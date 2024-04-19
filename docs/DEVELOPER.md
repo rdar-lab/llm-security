@@ -64,7 +64,7 @@ The environment works best in Ubuntu
    > git clone --recursive [PROJECT PATH]
 2. Go into the project directory
 3. Create and activate the virtualenv
-   > python -m venv .venv
+   > python -m venv .venv\
    > source .venv/bin/activate
 4. Install project dependencies on the terminal of pycharm.
    > ./install_deps.sh
