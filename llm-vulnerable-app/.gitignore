@@ -1,0 +1,10 @@
+/output/
+/cache/
+/.idea/
+*__pycache__*
+/templates/*.csv
+/htmlcov
+/.coverage*
+/coverage.xml
+/.venv
+/.python-version

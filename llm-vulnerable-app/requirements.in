@@ -1,0 +1,10 @@
+django
+django-extensions
+pip-tools
+langchain
+langchain-community
+langchain-openai
+#psycopg2
+djangorestframework
+markdown
+django-filter

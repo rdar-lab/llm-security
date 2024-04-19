@@ -1,0 +1,23 @@
+version: '3'
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.220.0/24
+services:
+  psql:
+    image: postgres:13.14
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=psqldb
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=llm
+      - PGDATA=/var/lib/postgresql/data/db-files/
+    volumes:
+      - llm_psql_volume:/var/lib/postgresql/data
+
+volumes:
+  llm_psql_volume: { }
