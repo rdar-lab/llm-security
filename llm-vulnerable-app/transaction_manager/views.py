@@ -55,17 +55,24 @@ class TransactionAskView(APIView):
 
     def get(self, request, *args, **kwargs):
         current_user_id = request.user.id
-
         search_text = self.__get_search_text()
 
-        llm_helper = LLmHelper()
-        # Use llm helper to answer the question
-        answer = llm_helper.answer_question_on_db(_QUESTION_INSTRUCTION, {
-            "query": search_text,
-            "user_id": current_user_id
-        })
+        answer = None
+        error = None
 
-        return JsonResponse({"answer": answer}, json_dumps_params={"default": lambda x: vars(x)})
+        try:
+            llm_helper = LLmHelper()
+            # Use llm helper to answer the question
+            answer = llm_helper.answer_question_on_db(_QUESTION_INSTRUCTION, {
+                "query": search_text,
+                "user_id": current_user_id
+            })
+        except Exception as e:
+            error = repr(e)
+        return JsonResponse({
+            "answer": answer,
+            "error": error
+        }, json_dumps_params={"default": lambda x: vars(x)})
 
     def __get_search_text(self):
         search_text = self.request.GET.get('search_text', '')
@@ -107,14 +114,16 @@ class TransactionSearchView(generics.ListAPIView):
         return search_text
 
     def list(self, request, *args, **kwargs):
-        sql_query = self._calc_sql_query()
+        sql_query = None
+        transactions = None
+        error = None
+
         try:
+            sql_query = self._calc_sql_query()
             queryset = self.filter_queryset(self.get_queryset(sql_query))
             serializer = self.get_serializer(queryset, many=True)
             transactions = serializer.data
-            error = None
         except Exception as e:
-            transactions = []
             error = repr(e)
 
         # Return the transactions and the summary
