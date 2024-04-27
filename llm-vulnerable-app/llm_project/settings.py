@@ -129,6 +129,27 @@ REST_FRAMEWORK = {
     ]
 }
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {
+            "format": "{levelname} - {asctime} - {module} - {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default"
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 LLM_TYPE = 'azure_openai'
 LLM_API_KEY = 'MY API KEY HERE'
 LLM_ENDPOINT = "MY LLM ENDPOINT HERE"
