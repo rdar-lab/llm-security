@@ -72,7 +72,7 @@ class TransactionsView(generics.ListCreateAPIView):
 class TransactionAskView(APIView, SearchBasedView):
     queryset = Transaction.objects.none()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         current_user_id = request.user.id
         search_text = self._get_search_text()
 
@@ -102,7 +102,7 @@ class TransactionAskView(APIView, SearchBasedView):
 class TransactionAskPreloadedView(APIView, SearchBasedView):
     queryset = Transaction.objects.none()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         search_text = self._get_search_text()
 
         prompt_args = None
