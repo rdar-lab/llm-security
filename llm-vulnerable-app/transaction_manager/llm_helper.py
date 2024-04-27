@@ -52,7 +52,7 @@ class LLmHelper:
             raise ValueError('Invalid LLM_TYPE in settings.py')
 
     @staticmethod
-    def _parse_result(answer):
+    def parse_answer(answer):
         if isinstance(answer, AIMessage):
             return answer.content
 
