@@ -7,7 +7,7 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView, View
 
-from .llm_helper import LLmHelper
+from common.llm_helper import LLmHelper
 from .models import Transaction
 from .serializers import TransactionSerializer
 

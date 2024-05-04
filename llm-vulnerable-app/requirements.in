@@ -8,3 +8,8 @@ langchain-openai
 djangorestframework
 markdown
 django-filter
+unstructured
+faiss-cpu
+langchainhub
+fake_useragent
+beautifulsoup4
