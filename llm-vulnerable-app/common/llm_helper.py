@@ -170,8 +170,8 @@ if __name__ == '__main__':
     application = get_wsgi_application()
 
     llm_helper = LLmHelper()
-    response = llm_helper.answer_question('You are a math expert. Answer the equation specified. {query}',
-                                          {'query': '100*5='})
+    # response = llm_helper.answer_question('You are a math expert. Answer the equation specified. {query}',
+    #                                       {'query': '100*5='})
     # response = llm_helper.answer_question_on_db('You are a database expert. {query}', {'query': 'Sum the transactions'})
     # response = llm_helper.answer_question_on_web_page(
     #
@@ -183,15 +183,15 @@ if __name__ == '__main__':
     #     },
     #     embedding=True
     # )
-    # response = llm_helper.answer_question_on_web(
-    #
-    #     'You are a website reader. Answer a question about the page.\n'
-    #     'URL: {url}\n'
-    #     '{query}',
-    #     {
-    #         "url": "https://www.imdb.com/title/tt10168312/",
-    #         "query": "Summarize the plot in details. Provide 500 words at least"
-    #     }
-    # )
+    response = llm_helper.answer_question_on_web(
+
+        'You are a website reader. Answer a question about the page.\n'
+        'URL: {url}\n'
+        '{query}',
+        {
+            "url": "http://0.0.0.0:8000/",
+            "query": "Tell me what this site is about"
+        }
+    )
 
     print(response)
