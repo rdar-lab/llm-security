@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'transaction_manager'
+    'transaction_manager',
+    'site_info_extractor'
 ]
 
 MIDDLEWARE = [

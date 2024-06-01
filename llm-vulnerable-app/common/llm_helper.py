@@ -111,7 +111,7 @@ class LLmHelper:
         _logger.info(f"Answer: {answer}")
         return answer
 
-    def answer_question_on_db(self, instruction_template, input_variables):
+    def answer_question_on_db_with_rag(self, instruction_template, input_variables):
         agent = create_sql_agent(self.__llm, db=self.__db, verbose=True,
                                  agent_executor_kwargs={"return_intermediate_steps": True})
         return self.__run_llm(agent, instruction_template, input_variables)
@@ -119,9 +119,16 @@ class LLmHelper:
     def answer_question(self, instruction_template, input_variables):
         return self.__run_llm(self.__llm, instruction_template, input_variables)
 
-    def answer_question_on_web_page(self, instruction_template, input_variables, embedding=True):
+    def answer_question_on_web_page_with_retriever(self, instruction_template, input_variables, embedding=True):
         documents = website_reader.read_from_url(input_variables['url'])
         return self._answer_question_on_documents(documents, instruction_template, input_variables, embedding=embedding)
+
+    def answer_question_on_web_page_with_rag(self, instruction_template, input_variables):
+        return self._answer_question_with_tools(
+            [reader_tool.SimpleReaderTool(), reader_tool.ReaderTool()],
+            instruction_template,
+            input_variables
+        )
 
     def _answer_question_on_documents(self, documents, instruction_template, input_variables, embedding=True):
         if embedding:
@@ -154,12 +161,6 @@ class LLmHelper:
         agent_executor.return_intermediate_steps = True
         return self.__run_llm(agent_executor, instruction_template, input_variables, wrap_prompt=True)
 
-    def answer_question_on_web(self, instruction_template, input_variables):
-        return self._answer_question_with_tools(
-            [reader_tool.SimpleReaderTool(), reader_tool.ReaderTool()],
-            instruction_template,
-            input_variables
-        )
 
 
 if __name__ == '__main__':
@@ -183,7 +184,7 @@ if __name__ == '__main__':
     #     },
     #     embedding=True
     # )
-    response = llm_helper.answer_question_on_web(
+    response = llm_helper.answer_question_on_web_page_with_rag(
 
         'You are a website reader. Answer a question about the page.\n'
         'URL: {url}\n'

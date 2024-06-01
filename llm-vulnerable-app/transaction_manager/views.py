@@ -1,4 +1,5 @@
 import json
+import logging
 from abc import ABC
 
 from django.conf import settings
@@ -10,6 +11,8 @@ from rest_framework.views import APIView, View
 from common.llm_helper import LLmHelper
 from .models import Transaction
 from .serializers import TransactionSerializer
+
+_logger = logging.getLogger(__name__)
 
 _QUESTION_INSTRUCTION = \
     """
@@ -87,8 +90,9 @@ class TransactionAskView(APIView, SearchBasedView):
         try:
             llm_helper = LLmHelper()
             # Use llm helper to answer the question
-            answer = llm_helper.answer_question_on_db(_QUESTION_INSTRUCTION, prompt_args)
+            answer = llm_helper.answer_question_on_db_with_rag(_QUESTION_INSTRUCTION, prompt_args)
         except Exception as e:
+            _logger.exception("Error while answering the question")
             error = repr(e)
         return JsonResponse({
             "prompt": _QUESTION_INSTRUCTION,
@@ -124,6 +128,7 @@ class TransactionAskPreloadedView(APIView, SearchBasedView):
             answer = llm_helper.answer_question(_PRELOADED_INSTRUCTION, prompt_args)
             answer = llm_helper.parse_answer(answer)
         except Exception as e:
+            _logger.exception("Error while answering the question")
             error = repr(e)
         return JsonResponse({
             "prompt": _PRELOADED_INSTRUCTION,
@@ -173,6 +178,7 @@ class TransactionSearchView(generics.ListAPIView, SearchBasedView):
             serializer = self.get_serializer(queryset, many=True)
             transactions = serializer.data
         except Exception as e:
+            _logger.exception("Error while answering the question")
             error = repr(e)
 
         # Return the transactions and the summary
