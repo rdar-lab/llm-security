@@ -1,12 +1,11 @@
 import json
 import logging
-from abc import ABC
 
 from django.conf import settings
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
-from rest_framework.views import APIView, View
+from rest_framework.views import APIView
 
 from common.llm_helper import LLmHelper
 from .models import Transaction
@@ -55,12 +54,11 @@ _PRELOADED_INSTRUCTION = \
     """
 
 
-class SearchBasedView(View, ABC):
-    def _get_search_text(self):
-        search_text = self.request.GET.get('search_text', '')
-        if search_text is None or len(search_text) == 0:
-            raise ValidationError('Invalid search text')
-        return search_text
+def _get_search_text(request):
+    search_text = request.GET.get('search_text', '')
+    if search_text is None or len(search_text) == 0:
+        raise ValidationError('Invalid search text')
+    return search_text
 
 
 class TransactionsView(generics.ListCreateAPIView):
@@ -72,12 +70,12 @@ class TransactionsView(generics.ListCreateAPIView):
 
 
 # Question answering based on RAT (Retrieval Augmented Thoughts)
-class TransactionAskView(APIView, SearchBasedView):
+class TransactionAskView(APIView):
     queryset = Transaction.objects.none()
 
     def get(self, request):
         current_user_id = request.user.id
-        search_text = self._get_search_text()
+        search_text = _get_search_text(request)
 
         answer = None
         error = None
@@ -103,11 +101,11 @@ class TransactionAskView(APIView, SearchBasedView):
 
 
 # Question asking with data preloaded
-class TransactionAskPreloadedView(APIView, SearchBasedView):
+class TransactionAskPreloadedView(APIView):
     queryset = Transaction.objects.none()
 
     def get(self, request):
-        search_text = self._get_search_text()
+        search_text = _get_search_text(request)
 
         prompt_args = None
         answer = None
@@ -139,7 +137,7 @@ class TransactionAskPreloadedView(APIView, SearchBasedView):
 
 
 # LLM as SQL generation engine
-class TransactionSearchView(generics.ListAPIView, SearchBasedView):
+class TransactionSearchView(generics.ListAPIView):
     queryset = Transaction.objects.none()
     serializer_class = TransactionSerializer
 
@@ -165,7 +163,7 @@ class TransactionSearchView(generics.ListAPIView, SearchBasedView):
 
         try:
             current_user_id = self.request.user.id
-            search_text = self._get_search_text()
+            search_text = _get_search_text(request)
             engine = settings.DATABASES['default']['ENGINE']
             prompt_args = {
                 "query": search_text,
