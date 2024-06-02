@@ -16,7 +16,7 @@ from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_text_splitters import CharacterTextSplitter
 
-from common import website_reader, reader_tool
+from llm import website_reader, reader_tool
 
 _MAX_TOKENS = 7000
 
