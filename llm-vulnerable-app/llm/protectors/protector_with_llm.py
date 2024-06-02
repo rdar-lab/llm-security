@@ -1,6 +1,6 @@
 import logging
 
-from llm.llm_helper import LLMManager
+from llm.llm_manager import LLMManager
 from llm.protectors.protector import LLMProtector
 
 _logger = logging.getLogger(__name__)
