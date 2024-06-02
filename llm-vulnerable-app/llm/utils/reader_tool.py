@@ -3,7 +3,7 @@ from typing import Type
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 
-from llm import website_reader
+from llm.utils import website_reader
 
 MAX_RESULT_LENGTH_CHAR = 1000 * 4  # roughly 1,000 tokens
 

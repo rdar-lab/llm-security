@@ -1,6 +1,8 @@
 import logging
 
-from llm.llm_protectors import LLMProtectorWithLLM, LLMProtectorWrapper, LLMProtectorRepeat
+from llm.protectors.protector_repeat import LLMProtectorRepeat
+from llm.protectors.protector_wrapper import LLMProtectorWrapper
+from llm.protectors.protector_with_llm import LLMProtectorWithLLM
 
 _logger = logging.getLogger(__name__)
 

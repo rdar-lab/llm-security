@@ -7,8 +7,8 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 
-from llm.llm_helper import LLMHelper
-from llm.protector_utils import get_protector
+from llm.llm_manager import LLMManager
+from llm.protectors.protector_utils import get_protector
 from .models import Transaction
 from .serializers import TransactionSerializer
 
@@ -84,9 +84,9 @@ class TransactionAskView(APIView):
         }
 
         try:
-            llm_helper = LLMHelper(protector=get_protector(request))
+            llm = LLMManager(protector=get_protector(request))
             # Use llm helper to answer the question
-            answer = llm_helper.answer_question_on_db_with_rag(_QUESTION_INSTRUCTION, prompt_args)
+            answer = llm.answer_question_on_db_with_rag(_QUESTION_INSTRUCTION, prompt_args)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
@@ -119,10 +119,10 @@ class TransactionAskPreloadedView(APIView):
                 "query": search_text,
             }
 
-            llm_helper = LLMHelper(protector=get_protector(request))
+            llm = LLMManager(protector=get_protector(request))
             # Use llm helper to answer the question
-            answer = llm_helper.answer_question(_PRELOADED_INSTRUCTION, prompt_args)
-            answer = llm_helper.parse_answer(answer)
+            answer = llm.answer_question(_PRELOADED_INSTRUCTION, prompt_args)
+            answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
@@ -161,8 +161,8 @@ class TransactionSearchView(generics.ListAPIView):
                 "user_id": current_user_id,
                 "db_type": engine
             }
-            llm_helper = LLMHelper(protector=get_protector(request))
-            sql_query = llm_helper.parse_answer(llm_helper.answer_question(_SQL_INSTRUCTION, prompt_args))
+            llm = LLMManager(protector=get_protector(request))
+            sql_query = llm.parse_answer(llm.answer_question(_SQL_INSTRUCTION, prompt_args))
             queryset = self.filter_queryset(self.get_queryset_by_sql(sql_query))
             serializer = self.get_serializer(queryset, many=True)
             transactions = serializer.data

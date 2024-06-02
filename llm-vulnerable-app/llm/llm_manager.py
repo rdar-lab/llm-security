@@ -1,5 +1,5 @@
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Optional
 
 from django.conf import settings
@@ -16,7 +16,8 @@ from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_text_splitters import CharacterTextSplitter
 
-from llm import website_reader, reader_tool
+from llm.utils import website_reader, reader_tool
+from llm.protectors.protector import LLMProtector
 
 _MAX_TOKENS = 7000
 _MAX_CHARS = _MAX_TOKENS * 4
@@ -24,13 +25,7 @@ _MAX_CHARS = _MAX_TOKENS * 4
 _logger = logging.getLogger(__name__)
 
 
-class LLMProtector(ABC):
-    @abstractmethod
-    def protect_call(self, instruction_template, input_variables):
-        raise NotImplementedError()
-
-
-class LLMHelper(ABC):
+class LLMManager(ABC):
     __db_url = None
 
     def __init__(self, protector: Optional[LLMProtector] = None):
@@ -41,9 +36,9 @@ class LLMHelper(ABC):
 
     def __get_db(self):
         if self.__db is None:
-            if LLMHelper.__db_url is None:
-                LLMHelper.__db_url = self.__calc_db_url()
-            self.__db = SQLDatabase.from_uri(LLMHelper.__db_url)
+            if LLMManager.__db_url is None:
+                LLMManager.__db_url = self.__calc_db_url()
+            self.__db = SQLDatabase.from_uri(LLMManager.__db_url)
         return self.__db
 
     @staticmethod
@@ -120,7 +115,7 @@ class LLMHelper(ABC):
     @staticmethod
     def __calc_instruction_template(instruction, input_variables):
         if 'query' in input_variables:
-            if LLMHelper.__is_template(instruction):
+            if LLMManager.__is_template(instruction):
                 instruction = PromptTemplate.from_template(instruction).format(**input_variables)
 
             input_variables = {**input_variables, 'instruction': instruction}

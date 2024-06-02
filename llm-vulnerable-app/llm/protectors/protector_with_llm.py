@@ -1,6 +1,7 @@
 import logging
 
-from llm.llm_helper import LLMHelper, LLMProtector
+from llm.llm_helper import LLMManager
+from llm.protectors.protector import LLMProtector
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class LLMProtectorWithLLM(LLMProtector):
 
     def __init__(self):
         super().__init__()
-        self.__llm = LLMHelper()
+        self.__llm = LLMManager()
 
     def protect_call(self, instruction_template, input_variables):
         answer = self.__llm.answer_question(
@@ -38,39 +39,10 @@ class LLMProtectorWithLLM(LLMProtector):
             }
         )
 
-        answer = LLMHelper.parse_answer(answer)
+        answer = LLMManager.parse_answer(answer)
 
         if "yes" not in answer.lower():
             _logger.warning(f"The instruction is dangerous - Protector LLM answer isSafe='{answer}' - Ignoring it")
             raise Exception(f"Instruction flagged -  Protector LLM answer isSafe='{answer}'")
         else:
             return instruction_template, input_variables
-
-
-class LLMProtectorWrapper(LLMProtector):
-
-    def __init__(self, prefix='*** USER INPUT *** [\n', postfix='\n] *** END USER INPUT ***\n'):
-        super().__init__()
-        self.__prefix = prefix
-        self.__postfix = postfix
-
-    def protect_call(self, instruction_template, input_variables):
-        query = input_variables["query"]
-        query = self.__prefix + query + self.__postfix
-        input_variables["query"] = query
-        return instruction_template, input_variables
-
-
-class LLMProtectorRepeat(LLMProtector):
-
-    def __init__(self, repeat=1):
-        super().__init__()
-        self.__repeat = repeat
-
-    def protect_call(self, instruction_template, input_variables):
-        if 'instruction' in instruction_template:
-            instruction_template = instruction_template + '\nReminder: {instruction}'
-        else:
-            _logger.warning("Instruction template does not contain 'instruction' variable - Ignoring it")
-
-        return instruction_template, input_variables

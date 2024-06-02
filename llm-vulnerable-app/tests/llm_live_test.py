@@ -1,4 +1,4 @@
-from llm.llm_helper import LLMHelper
+from llm.llm_manager import LLMManager
 
 if __name__ == '__main__':
     import os
@@ -7,11 +7,11 @@ if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'llm_project.settings')
     application = get_wsgi_application()
 
-    llm_helper = LLMHelper()
-    # response = llm_helper.answer_question('You are a math expert. Answer the equation specified. {query}',
+    llm = LLMManager()
+    # response = llm.answer_question('You are a math expert. Answer the equation specified. {query}',
     #                                       {'query': '100*5='})
-    # response = llm_helper.answer_question_on_db('You are a database expert. {query}', {'query': 'Sum the transactions'})
-    response = llm_helper.answer_question_on_web_page_with_retriever(
+    # response = llm.answer_question_on_db('You are a database expert. {query}', {'query': 'Sum the transactions'})
+    response = llm.answer_question_on_web_page_with_retriever(
 
         'You are a website reader. Answer a question about the content.'
         '{query}',
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         },
         embedding=False
     )
-    # response = llm_helper.answer_question_on_web_page_with_rag(
+    # response = llm.answer_question_on_web_page_with_rag(
     #
     #     'You are a website reader. Answer a question about the page.\n'
     #     'URL: {url}\n'
