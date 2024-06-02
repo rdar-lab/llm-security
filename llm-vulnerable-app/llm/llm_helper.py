@@ -1,4 +1,6 @@
 import logging
+from abc import ABC, abstractmethod
+from typing import Optional
 
 from django.conf import settings
 from langchain import hub
@@ -21,18 +23,25 @@ _MAX_TOKENS = 7000
 _logger = logging.getLogger(__name__)
 
 
-class LLmHelper:
+class LLMProtector(ABC):
+    @abstractmethod
+    def protect_call(self, instruction_template, input_variables):
+        raise NotImplementedError()
+
+
+class LLMHelper(ABC):
     __db_url = None
 
-    def __init__(self):
+    def __init__(self, protector: Optional[LLMProtector] = None):
         super().__init__()
         self.__init_llm()
         self.__init_db()
+        self.__protector = protector
 
     def __init_db(self):
-        if LLmHelper.__db_url is None:
-            LLmHelper.__db_url = self.__calc_db_url()
-        self.__db = SQLDatabase.from_uri(LLmHelper.__db_url)
+        if LLMHelper.__db_url is None:
+            LLMHelper.__db_url = self.__calc_db_url()
+        self.__db = SQLDatabase.from_uri(LLMHelper.__db_url)
 
     @staticmethod
     def __calc_db_url():
@@ -102,8 +111,31 @@ class LLmHelper:
         return str(answer)
 
     @staticmethod
-    def __run_llm(model, instruction_template, input_variables, wrap_prompt=False):
-        _logger.info(f"Running in LLM: {instruction_template}. Variables={input_variables}")
+    def _is_template(instruction):
+        return '{' in instruction
+
+    @staticmethod
+    def _calc_instruction_template(instruction, input_variables):
+        if 'query' in input_variables:
+            if LLMHelper._is_template(instruction):
+                instruction = PromptTemplate.from_template(instruction).format(**input_variables)
+
+            input_variables = {**input_variables, 'instruction': instruction}
+            if 'data' in input_variables:
+                instruction = '{instruction}\nHere is the data:\n{data}\nAnswer the question below:\n{query}'
+            else:
+                instruction = '{instruction}\nAnswer the question below:\n{query}'
+
+        return instruction, input_variables
+
+    def __run_llm(self, model, instruction, input_variables, wrap_prompt=False):
+        _logger.info(f"Running in LLM: {instruction}. Variables={input_variables}")
+
+        instruction_template, input_variables = self._calc_instruction_template(instruction, input_variables)
+        if self.__protector is not None:
+            instruction_template, input_variables = self.__protector.protect_call(
+                instruction_template, input_variables)
+
         prompt = PromptTemplate.from_template(instruction_template).format(**input_variables)
         if wrap_prompt:
             prompt = {"input": prompt}
@@ -148,7 +180,7 @@ class LLmHelper:
             return self.__run_llm(chain, instruction_template, input_variables)
         else:
             page_content = "\n".join([doc.page_content for doc in documents])
-            return self.answer_question(instruction_template, {**input_variables, "page_content": page_content})
+            return self.answer_question(instruction_template, {**input_variables, "data": page_content})
 
     def _answer_question_with_tools(self, tools, instruction_template, input_variables):
         prompt = hub.pull("hwchase17/structured-chat-agent")
@@ -162,7 +194,6 @@ class LLmHelper:
         return self.__run_llm(agent_executor, instruction_template, input_variables, wrap_prompt=True)
 
 
-
 if __name__ == '__main__':
     import os
     from django.core.wsgi import get_wsgi_application
@@ -170,29 +201,29 @@ if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'llm_project.settings')
     application = get_wsgi_application()
 
-    llm_helper = LLmHelper()
+    llm_helper = LLMHelper()
     # response = llm_helper.answer_question('You are a math expert. Answer the equation specified. {query}',
     #                                       {'query': '100*5='})
     # response = llm_helper.answer_question_on_db('You are a database expert. {query}', {'query': 'Sum the transactions'})
-    # response = llm_helper.answer_question_on_web_page(
-    #
-    #     'You are a website reader. Answer a question about the content.\n'
-    #     '{query}',
-    #     {
-    #         "url": "https://raw.githubusercontent.com/greshake/llm-security/main/scenarios/common/albert_einstein.md",
-    #         "query": "Summarize"
-    #     },
-    #     embedding=True
-    # )
-    response = llm_helper.answer_question_on_web_page_with_rag(
+    response = llm_helper.answer_question_on_web_page_with_retriever(
 
-        'You are a website reader. Answer a question about the page.\n'
-        'URL: {url}\n'
+        'You are a website reader. Answer a question about the content.'
         '{query}',
         {
-            "url": "http://0.0.0.0:8000/",
-            "query": "Tell me what this site is about"
-        }
+            "url": "https://raw.githubusercontent.com/greshake/llm-security/main/scenarios/common/albert_einstein.md",
+            "query": "Summarize"
+        },
+        embedding=False
     )
+    # response = llm_helper.answer_question_on_web_page_with_rag(
+    #
+    #     'You are a website reader. Answer a question about the page.\n'
+    #     'URL: {url}\n'
+    #     '{query}',
+    #     {
+    #         "url": "http://0.0.0.0:8000/",
+    #         "query": "Tell me what this site is about"
+    #     }
+    # )
 
     print(response)

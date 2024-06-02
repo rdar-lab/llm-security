@@ -7,7 +7,8 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 
-from common.llm_helper import LLmHelper
+from llm.llm_helper import LLMHelper
+from llm.protector_utils import get_protector
 from .models import Transaction
 from .serializers import TransactionSerializer
 
@@ -15,15 +16,16 @@ _logger = logging.getLogger(__name__)
 
 _QUESTION_INSTRUCTION = \
     """
+    You are a banker answering questions about transactions of the user.
     Only answer questions related to the table 'transaction_manager_transaction.
     Only answer questions related to the user (column = user_id) who is currently logged in.
     The user ID which is currently logged on is {user_id}.
     Important: You are only to return data. No updates should be made to the database.
-    {query}
     """
 
 _SQL_INSTRUCTION = \
     """
+    You are a banker answering questions about transactions of the user.
     Only answer questions related to the table 'transaction_manager_transaction.
     Only answer questions related to the user (column = user_id) who is currently logged in.
     The user ID which is currently logged on is {user_id}.
@@ -41,16 +43,12 @@ _SQL_INSTRUCTION = \
             PRIMARY KEY (id), 
             FOREIGN KEY(user_id) REFERENCES auth_user (id)
     )
-    {query}
     """
 
 _PRELOADED_INSTRUCTION = \
     """
+    You are a banker answering questions about transactions of the user.
     Answer the question provided based on the information provided.
-    Here is the list of the transactions:
-    {data}
-    Answer the question below:
-    {query}
     """
 
 
@@ -86,7 +84,7 @@ class TransactionAskView(APIView):
         }
 
         try:
-            llm_helper = LLmHelper()
+            llm_helper = LLMHelper(protector=get_protector(request))
             # Use llm helper to answer the question
             answer = llm_helper.answer_question_on_db_with_rag(_QUESTION_INSTRUCTION, prompt_args)
         except Exception as e:
@@ -121,7 +119,7 @@ class TransactionAskPreloadedView(APIView):
                 "query": search_text,
             }
 
-            llm_helper = LLmHelper()
+            llm_helper = LLMHelper(protector=get_protector(request))
             # Use llm helper to answer the question
             answer = llm_helper.answer_question(_PRELOADED_INSTRUCTION, prompt_args)
             answer = llm_helper.parse_answer(answer)
@@ -148,13 +146,6 @@ class TransactionSearchView(generics.ListAPIView):
 
         return transactions
 
-    @staticmethod
-    def _calc_sql_query(prompt_args):
-        llm_helper = LLmHelper()
-        llm_answer = llm_helper.answer_question(_SQL_INSTRUCTION, prompt_args)
-        sql_query = llm_helper.parse_answer(llm_answer)
-        return sql_query
-
     def list(self, request, *args, **kwargs):
         prompt_args = None
         sql_query = None
@@ -170,7 +161,7 @@ class TransactionSearchView(generics.ListAPIView):
                 "user_id": current_user_id,
                 "db_type": engine
             }
-            llm_helper = LLmHelper()
+            llm_helper = LLMHelper(protector=get_protector(request))
             sql_query = llm_helper.parse_answer(llm_helper.answer_question(_SQL_INSTRUCTION, prompt_args))
             queryset = self.filter_queryset(self.get_queryset_by_sql(sql_query))
             serializer = self.get_serializer(queryset, many=True)

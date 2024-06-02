@@ -4,11 +4,12 @@ from django.http import JsonResponse
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 
-from common.llm_helper import LLmHelper
+from llm.llm_helper import LLMHelper
+from llm.protector_utils import get_protector
 from transaction_manager.models import Transaction
 
-_QUESTION_INSTRUCTION_RETRIEVER = 'You are a website reader. Answer a question about the content.\n{query}'
-_QUESTION_INSTRUCTION_RAG = 'You are a website reader. Answer a question about the page.\nURL: {url}\n{query}'
+_QUESTION_INSTRUCTION_RETRIEVER = 'You are a website reader. Answer a question about the content.'
+_QUESTION_INSTRUCTION_RAG = 'You are a website reader. Answer a user question about the page.\nURL: {url}'
 
 _logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class AskQuestionOnSiteRetrieverView(APIView):
         answer = None
         error = None
         try:
-            llm_helper = LLmHelper()
+            llm_helper = LLMHelper(protector=get_protector(request))
             answer = llm_helper.answer_question_on_web_page_with_retriever(instruction, prompt_args,
                                                                            embedding=use_embeddings)
         except Exception as e:
@@ -77,7 +78,7 @@ class AskQuestionOnSiteRagView(APIView):
         answer = None
         error = None
         try:
-            llm_helper = LLmHelper()
+            llm_helper = LLMHelper(protector=get_protector(request))
             answer = llm_helper.answer_question_on_web_page_with_rag(instruction, prompt_args)
         except Exception as e:
             _logger.exception("Error while answering the question")
