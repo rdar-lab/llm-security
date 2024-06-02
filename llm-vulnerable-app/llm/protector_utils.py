@@ -22,5 +22,4 @@ def get_protector(request):
     if protector == 'repeat':
         return LLMProtectorRepeat()
 
-    _logger.warning("Invalid protector: {}".format(protector))
-    return None
+    raise Exception("Invalid protector: {}".format(protector))
