@@ -19,6 +19,7 @@ from langchain_text_splitters import CharacterTextSplitter
 from llm import website_reader, reader_tool
 
 _MAX_TOKENS = 7000
+_MAX_CHARS = _MAX_TOKENS * 4
 
 _logger = logging.getLogger(__name__)
 
@@ -35,13 +36,15 @@ class LLMHelper(ABC):
     def __init__(self, protector: Optional[LLMProtector] = None):
         super().__init__()
         self.__init_llm()
-        self.__init_db()
+        self.__db = None
         self.__protector = protector
 
-    def __init_db(self):
-        if LLMHelper.__db_url is None:
-            LLMHelper.__db_url = self.__calc_db_url()
-        self.__db = SQLDatabase.from_uri(LLMHelper.__db_url)
+    def __get_db(self):
+        if self.__db is None:
+            if LLMHelper.__db_url is None:
+                LLMHelper.__db_url = self.__calc_db_url()
+            self.__db = SQLDatabase.from_uri(LLMHelper.__db_url)
+        return self.__db
 
     @staticmethod
     def __calc_db_url():
@@ -111,13 +114,13 @@ class LLMHelper(ABC):
         return str(answer)
 
     @staticmethod
-    def _is_template(instruction):
+    def __is_template(instruction):
         return '{' in instruction
 
     @staticmethod
-    def _calc_instruction_template(instruction, input_variables):
+    def __calc_instruction_template(instruction, input_variables):
         if 'query' in input_variables:
-            if LLMHelper._is_template(instruction):
+            if LLMHelper.__is_template(instruction):
                 instruction = PromptTemplate.from_template(instruction).format(**input_variables)
 
             input_variables = {**input_variables, 'instruction': instruction}
@@ -131,7 +134,7 @@ class LLMHelper(ABC):
     def __run_llm(self, model, instruction, input_variables, wrap_prompt=False):
         _logger.info(f"Running in LLM: {instruction}. Variables={input_variables}")
 
-        instruction_template, input_variables = self._calc_instruction_template(instruction, input_variables)
+        instruction_template, input_variables = self.__calc_instruction_template(instruction, input_variables)
         if self.__protector is not None:
             instruction_template, input_variables = self.__protector.protect_call(
                 instruction_template, input_variables)
@@ -144,7 +147,7 @@ class LLMHelper(ABC):
         return answer
 
     def answer_question_on_db_with_rag(self, instruction_template, input_variables):
-        agent = create_sql_agent(self.__llm, db=self.__db, verbose=True,
+        agent = create_sql_agent(self.__llm, db=self.__get_db(), verbose=True,
                                  agent_executor_kwargs={"return_intermediate_steps": True})
         return self.__run_llm(agent, instruction_template, input_variables)
 
@@ -153,36 +156,41 @@ class LLMHelper(ABC):
 
     def answer_question_on_web_page_with_retriever(self, instruction_template, input_variables, embedding=True):
         documents = website_reader.read_from_url(input_variables['url'])
-        return self._answer_question_on_documents(documents, instruction_template, input_variables, embedding=embedding)
+        return self.__answer_question_on_documents(documents, instruction_template, input_variables,
+                                                   embedding=embedding)
 
     def answer_question_on_web_page_with_rag(self, instruction_template, input_variables):
-        return self._answer_question_with_tools(
+        return self.__answer_question_with_tools(
             [reader_tool.SimpleReaderTool(), reader_tool.ReaderTool()],
             instruction_template,
             input_variables
         )
 
-    def _answer_question_on_documents(self, documents, instruction_template, input_variables, embedding=True):
+    def __chain_for_retriever(self, documents):
+        if len(documents) == 0 or (len(documents) == 1 and documents[0].page_content == ""):
+            raise Exception("No content found in the document")
+        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+        texts = text_splitter.split_documents(documents)
+        db = FAISS.from_documents(texts, self.__embedding)
+        retriever = db.as_retriever()
+        chain = RetrievalQAWithSourcesChain.from_chain_type(llm=self.__llm, chain_type="stuff", retriever=retriever,
+                                                            reduce_k_below_max_tokens=True,
+                                                            max_tokens_limit=_MAX_TOKENS)
+        return chain
+
+    def __answer_question_on_documents(self, documents, instruction_template, input_variables, embedding=True):
         if embedding:
-            if len(documents) == 0 or (len(documents) == 1 and documents[0].page_content == ""):
-                raise Exception("No content found in the document")
-
-            text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-            texts = text_splitter.split_documents(documents)
-
-            db = FAISS.from_documents(texts, self.__embedding)
-            retriever = db.as_retriever()
-
-            chain = RetrievalQAWithSourcesChain.from_chain_type(llm=self.__llm, chain_type="stuff", retriever=retriever,
-                                                                reduce_k_below_max_tokens=True,
-                                                                max_tokens_limit=_MAX_TOKENS)
+            chain = self.__chain_for_retriever(documents)
 
             return self.__run_llm(chain, instruction_template, input_variables)
         else:
             page_content = "\n".join([doc.page_content for doc in documents])
+            if len(page_content) > _MAX_CHARS:
+                _logger.warning(f"Page content is too long. Truncating to {_MAX_CHARS} chars")
+                page_content = page_content[:_MAX_CHARS]
             return self.answer_question(instruction_template, {**input_variables, "data": page_content})
 
-    def _answer_question_with_tools(self, tools, instruction_template, input_variables):
+    def __answer_question_with_tools(self, tools, instruction_template, input_variables):
         prompt = hub.pull("hwchase17/structured-chat-agent")
         agent = create_structured_chat_agent(
             self.__llm,
@@ -192,38 +200,3 @@ class LLMHelper(ABC):
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         agent_executor.return_intermediate_steps = True
         return self.__run_llm(agent_executor, instruction_template, input_variables, wrap_prompt=True)
-
-
-if __name__ == '__main__':
-    import os
-    from django.core.wsgi import get_wsgi_application
-
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'llm_project.settings')
-    application = get_wsgi_application()
-
-    llm_helper = LLMHelper()
-    # response = llm_helper.answer_question('You are a math expert. Answer the equation specified. {query}',
-    #                                       {'query': '100*5='})
-    # response = llm_helper.answer_question_on_db('You are a database expert. {query}', {'query': 'Sum the transactions'})
-    response = llm_helper.answer_question_on_web_page_with_retriever(
-
-        'You are a website reader. Answer a question about the content.'
-        '{query}',
-        {
-            "url": "https://raw.githubusercontent.com/greshake/llm-security/main/scenarios/common/albert_einstein.md",
-            "query": "Summarize"
-        },
-        embedding=False
-    )
-    # response = llm_helper.answer_question_on_web_page_with_rag(
-    #
-    #     'You are a website reader. Answer a question about the page.\n'
-    #     'URL: {url}\n'
-    #     '{query}',
-    #     {
-    #         "url": "http://0.0.0.0:8000/",
-    #         "query": "Tell me what this site is about"
-    #     }
-    # )
-
-    print(response)
