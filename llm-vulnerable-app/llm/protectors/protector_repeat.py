@@ -11,10 +11,10 @@ class LLMProtectorRepeat(LLMProtector):
         super().__init__()
         self.__repeat = repeat
 
-    def protect_call(self, instruction_template, input_variables):
-        if 'instruction' in instruction_template:
-            instruction_template = instruction_template + '\nReminder: {instruction}'
+    def protect_call(self, system_instruction_template, system_input_variables, user_instruction, user_input_variables):
+        if 'instruction' in system_input_variables:
+            system_instruction_template = system_instruction_template + '\nReminder: {instruction}'
         else:
             _logger.warning("Instruction template does not contain 'instruction' variable - Ignoring it")
 
-        return instruction_template, input_variables
+        return system_instruction_template, system_input_variables

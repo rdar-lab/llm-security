@@ -16,8 +16,8 @@ from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_text_splitters import CharacterTextSplitter
 
-from llm.utils import website_reader, reader_tool
 from llm.protectors.protector import LLMProtector
+from llm.utils import website_reader, reader_tool
 
 _MAX_TOKENS = 7000
 _MAX_CHARS = _MAX_TOKENS * 4
@@ -126,15 +126,19 @@ class LLMManager(ABC):
 
         return instruction, input_variables
 
-    def __run_llm(self, model, instruction, input_variables, wrap_prompt=False):
-        _logger.info(f"Running in LLM: {instruction}. Variables={input_variables}")
+    def __run_llm(self, model, user_instruction, user_input_variables, wrap_prompt=False):
+        _logger.info(f"Running in LLM: {user_instruction}. Variables={user_input_variables}")
 
-        instruction_template, input_variables = self.__calc_instruction_template(instruction, input_variables)
+        system_instruction_template, system_input_variables = \
+            self.__calc_instruction_template(user_instruction, user_input_variables)
         if self.__protector is not None:
-            instruction_template, input_variables = self.__protector.protect_call(
-                instruction_template, input_variables)
+            system_instruction_template, system_input_variables = self.__protector.protect_call(
+                system_instruction_template, system_input_variables, user_instruction, user_input_variables)
 
-        prompt = PromptTemplate.from_template(instruction_template).format(**input_variables)
+        prompt = PromptTemplate.from_template(system_instruction_template).format(**system_input_variables)
+
+        _logger.info(f"Prompt: {prompt}")
+
         if wrap_prompt:
             prompt = {"input": prompt}
         answer = model.invoke(prompt)
