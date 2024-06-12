@@ -8,4 +8,4 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 """
 from llm_project import startup_manager
 
-application = startup_manager.init_asgi_app()
+application = startup_manager.init_app(env_type='prod', app_type='asgi')

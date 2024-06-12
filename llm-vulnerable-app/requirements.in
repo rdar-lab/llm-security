@@ -4,7 +4,8 @@ pip-tools
 langchain
 langchain-community
 langchain-openai
-#psycopg2
+psycopg2-binary
+psycopg2
 djangorestframework
 markdown
 django-filter
@@ -15,3 +16,4 @@ fake_useragent
 beautifulsoup4
 langchain-text-splitters
 tiktoken
+python-dotenv

@@ -49,6 +49,7 @@ class LLMManager(ABC):
         name = settings.DATABASES['default']['NAME']
         if 'sqlite' in engine:
             _logger.info("Using SQLite database")
+            _logger.info(f"Using URL=" + f"sqlite:////{name}")
             db_url = f"sqlite:////{name}"
         elif 'postgresql' in engine:
             _logger.info("Using PostgreSQL database")
@@ -56,7 +57,8 @@ class LLMManager(ABC):
             password = settings.DATABASES['default']['PASSWORD']
             host = settings.DATABASES['default']['HOST']
             port = settings.DATABASES['default']['PORT']
-            db_url = f"postgresql:////{user}:{password}@{host}:{port}/{name}"
+            _logger.info(f"Using URL=" + f"postgresql://{user}:XXX@{host}:{port}/{name}")
+            db_url = f"postgresql://{user}:{password}@{host}:{port}/{name}"
         else:
             raise ValueError('Unsupported database engine')
         return db_url

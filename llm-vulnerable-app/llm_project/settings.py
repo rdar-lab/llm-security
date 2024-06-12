@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,7 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--9q=n4xlv1-$6p1t=o9j=-lru+rqckvb(78&)97qwr3*cu2p@g'
+SECRET_KEY = os.environ.get('SECRET_KEY',
+                            'django-insecure--9q=n4xlv1-$6p1t=o9j=-lru+rqckvb(78&)97qwr3*cu2p@g')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -75,9 +77,12 @@ WSGI_APPLICATION = 'llm_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        'NAME': ':memory:'
+        'ENGINE': os.environ.get('DB_ENGINE', ''),
+        'NAME': os.environ.get('DB_NAME', ''),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASS', ''),
+        'HOST': os.environ.get('DB_HOST', ''),
+        'PORT': os.environ.get('DB_PORT', ''),
     }
 }
 
@@ -112,9 +117,10 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'static_preloaded']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -152,9 +158,9 @@ LOGGING = {
     },
 }
 
-LLM_TYPE = 'azure_openai'
-LLM_API_KEY = 'MY API KEY HERE'
-LLM_ENDPOINT = "MY LLM ENDPOINT HERE"
-LLM_API_VERSION = "2023-03-15-preview"
-LLM_DEPLOYMENT_NAME = "gpt-35-turbo"
-LLM_EMBEDDING_DEPLOYMENT_NAME = "text-embedding-ada-002"
+LLM_TYPE = os.environ.get('LLM_TYPE', 'azure_openai')
+LLM_API_KEY = os.environ.get('LLM_API_KEY', '')
+LLM_ENDPOINT = os.environ.get('LLM_ENDPOINT', '')
+LLM_API_VERSION = os.environ.get('LLM_API_VERSION', "2023-03-15-preview")
+LLM_DEPLOYMENT_NAME = os.environ.get('LLM_DEPLOYMENT_NAME', "gpt-35-turbo")
+LLM_EMBEDDING_DEPLOYMENT_NAME = os.environ.get('LLM_EMBEDDING_DEPLOYMENT_NAME', "text-embedding-ada-002")

@@ -1,1 +1,7 @@
 version: '3'
+services:
+  llm-vulnerable-app:
+    build:
+      context: ../llm-vulnerable-app/
+      dockerfile: ./deploy/Dockerfile
+

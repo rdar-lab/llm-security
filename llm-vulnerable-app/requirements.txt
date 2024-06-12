@@ -130,7 +130,7 @@ langchainhub==0.1.18
     # via -r requirements.in
 langdetect==1.0.9
     # via unstructured
-langsmith==0.1.76
+langsmith==0.1.77
     # via
     #   langchain
     #   langchain-community
@@ -175,7 +175,11 @@ packaging==23.2
     #   unstructured-client
 pip-tools==7.4.1
     # via -r requirements.in
-pydantic==2.7.3
+psycopg2==2.9.9
+    # via -r requirements.in
+psycopg2-binary==2.9.9
+    # via -r requirements.in
+pydantic==2.7.4
     # via
     #   langchain
     #   langchain-core
@@ -191,6 +195,8 @@ pyproject-hooks==1.1.0
     #   pip-tools
 python-dateutil==2.9.0.post0
     # via unstructured-client
+python-dotenv==1.0.1
+    # via -r requirements.in
 python-iso639==2024.4.27
     # via unstructured
 python-magic==0.4.27

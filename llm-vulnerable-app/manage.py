@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
-import os
 import sys
+
+from llm_project import startup_manager
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'llm_project.settings')
+    if 'runserver' in sys.argv:
+        startup_manager.init_app(env_type='dev')
+    else:
+        startup_manager.init_app(env_type='test')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

@@ -13,11 +13,25 @@ services:
       - 5432:5432
     environment:
       - POSTGRES_DB=psqldb
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=llm
       - POSTGRES_PASSWORD=llm
       - PGDATA=/var/lib/postgresql/data/db-files/
     volumes:
       - llm_psql_volume:/var/lib/postgresql/data
+  llm-vulnerable-app:
+    image: local/llm-vulnerable-app:latest
+    restart: unless-stopped
+    links:
+      - psql:psql
+    ports:
+      - 8081:80
+    volumes:
+      - llm_config_volume:/app/config
+    # healthcheck:
+    #   test: curl --fail http://localhost/api/ui/alive || kill 1
+    #   interval: 60s
+
 
 volumes:
   llm_psql_volume: { }
+  llm_config_volume: { }

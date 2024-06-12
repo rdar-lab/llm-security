@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from llm_project import startup_manager
 
-application = startup_manager.init_wsgi_app()
+application = startup_manager.init_app(env_type='test')
 
 
 class TestBase(TestCase, ABC):
