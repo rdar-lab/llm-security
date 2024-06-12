@@ -2,6 +2,7 @@ import logging
 from abc import ABC
 from typing import Optional
 
+import tiktoken
 from django.conf import settings
 from langchain import hub
 from langchain.agents import create_structured_chat_agent, AgentExecutor
@@ -30,9 +31,10 @@ class LLMManager(ABC):
 
     def __init__(self, protector: Optional[LLMProtector] = None):
         super().__init__()
-        self.__init_llm()
+        self._init_llm()
         self.__db = None
         self.__protector = protector
+        self.__tokenization_encoder = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
     def __get_db(self):
         if self.__db is None:
@@ -59,7 +61,7 @@ class LLMManager(ABC):
             raise ValueError('Unsupported database engine')
         return db_url
 
-    def __init_llm(self):
+    def _init_llm(self):
         self.__api_key = settings.LLM_API_KEY
         self.__llm_type = settings.LLM_TYPE
 
@@ -126,14 +128,14 @@ class LLMManager(ABC):
 
         return instruction, input_variables
 
-    def __run_llm(self, model, user_instruction, user_input_variables, wrap_prompt=False):
-        _logger.info(f"Running in LLM: {user_instruction}. Variables={user_input_variables}")
+    def __run_llm(self, model, app_instruction, user_input_variables, wrap_prompt=False):
+        _logger.info(f"Running in LLM: {app_instruction}. Variables={user_input_variables}")
 
         system_instruction_template, system_input_variables = \
-            self.__calc_instruction_template(user_instruction, user_input_variables)
+            self.__calc_instruction_template(app_instruction, user_input_variables)
         if self.__protector is not None:
             system_instruction_template, system_input_variables = self.__protector.protect_call(
-                system_instruction_template, system_input_variables, user_instruction, user_input_variables)
+                system_instruction_template, system_input_variables, app_instruction, user_input_variables)
 
         prompt = PromptTemplate.from_template(system_instruction_template).format(**system_input_variables)
 
@@ -199,3 +201,9 @@ class LLMManager(ABC):
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         agent_executor.return_intermediate_steps = True
         return self.__run_llm(agent_executor, instruction_template, input_variables, wrap_prompt=True)
+
+    def tokenize(self, text):
+        return self.__tokenization_encoder.encode(text)
+
+    def detokenize(self, tokens):
+        return self.__tokenization_encoder.decode(tokens)

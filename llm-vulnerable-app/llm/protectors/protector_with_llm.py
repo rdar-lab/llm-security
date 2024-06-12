@@ -28,13 +28,14 @@ class LLMProtectorWithLLM(LLMProtector):
 
     def __init__(self):
         super().__init__()
-        self.__llm = LLMManager()
+        self._llm = LLMManager()
 
-    def protect_call(self, system_instruction_template, system_input_variables, user_instruction, user_input_variables):
-        answer = self.__llm.answer_question(
-            self._CHECK_INSTRUCTION_TEMPLATE,
+    @staticmethod
+    def is_safe(llm, app_instruction, user_input_variables):
+        answer = llm.answer_question(
+            LLMProtectorWithLLM._CHECK_INSTRUCTION_TEMPLATE,
             {
-                "instruction": user_instruction,
+                "instruction": app_instruction,
                 "params": str(user_input_variables)
             }
         )
@@ -42,6 +43,13 @@ class LLMProtectorWithLLM(LLMProtector):
         answer = LLMManager.parse_answer(answer)
 
         if "yes" not in answer.lower():
+            return False, answer
+        else:
+            return True, answer
+
+    def protect_call(self, system_instruction_template, system_input_variables, app_instruction, user_input_variables):
+        is_safe, answer = LLMProtectorWithLLM.is_safe(self._llm, app_instruction, user_input_variables)
+        if not is_safe:
             _logger.warning(f"The instruction is dangerous - Protector LLM answer isSafe='{answer}' - Ignoring it")
             raise Exception(f"Instruction flagged -  Protector LLM answer isSafe='{answer}'")
         else:

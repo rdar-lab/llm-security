@@ -1,5 +1,6 @@
 import logging
 
+from llm.protectors.protector_erase_and_check import LLMProtectorEraseAndCheck
 from llm.protectors.protector_repeat import LLMProtectorRepeat
 from llm.protectors.protector_wrapper import LLMProtectorWrapper
 from llm.protectors.protector_with_llm import LLMProtectorWithLLM
@@ -23,5 +24,8 @@ def get_protector(request):
 
     if protector == 'repeat':
         return LLMProtectorRepeat()
+
+    if 'erase-and-check' in protector:
+        return LLMProtectorEraseAndCheck(mode=protector)
 
     raise Exception("Invalid protector: {}".format(protector))

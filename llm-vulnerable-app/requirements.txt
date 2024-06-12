@@ -10,9 +10,9 @@ aiohttp==3.9.5
     #   langchain-community
 aiosignal==1.3.1
     # via aiohttp
-annotated-types==0.6.0
+annotated-types==0.7.0
     # via pydantic
-anyio==4.3.0
+anyio==4.4.0
     # via
     #   httpx
     #   openai
@@ -32,7 +32,7 @@ beautifulsoup4==4.12.3
     #   unstructured
 build==1.2.1
     # via pip-tools
-certifi==2024.2.2
+certifi==2024.6.2
     # via
     #   httpcore
     #   httpx
@@ -48,9 +48,8 @@ click==8.1.7
     # via
     #   nltk
     #   pip-tools
-dataclasses-json==0.6.5
+dataclasses-json==0.6.7
     # via
-    #   langchain
     #   langchain-community
     #   unstructured
     #   unstructured-client
@@ -58,7 +57,7 @@ deepdiff==7.0.1
     # via unstructured-client
 distro==1.9.0
     # via openai
-django==5.0.4
+django==5.0.6
     # via
     #   -r requirements.in
     #   django-extensions
@@ -70,7 +69,7 @@ django-filter==24.2
     # via -r requirements.in
 djangorestframework==3.15.1
     # via -r requirements.in
-emoji==2.11.1
+emoji==2.12.1
     # via unstructured
 exceptiongroup==1.2.1
     # via anyio
@@ -91,7 +90,9 @@ h11==0.14.0
 httpcore==1.0.5
     # via httpx
 httpx==0.27.0
-    # via openai
+    # via
+    #   openai
+    #   unstructured-client
 idna==3.7
     # via
     #   anyio
@@ -102,43 +103,43 @@ idna==3.7
 joblib==1.4.2
     # via nltk
 jsonpatch==1.33
-    # via
-    #   langchain
-    #   langchain-core
+    # via langchain-core
 jsonpath-python==1.0.6
     # via unstructured-client
-jsonpointer==2.4
+jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.1.17
-    # via -r requirements.in
-langchain-community==0.0.36
+langchain==0.2.3
     # via
     #   -r requirements.in
-    #   langchain
-langchain-core==0.1.50
+    #   langchain-community
+langchain-community==0.2.4
+    # via -r requirements.in
+langchain-core==0.2.5
     # via
     #   langchain
     #   langchain-community
     #   langchain-openai
     #   langchain-text-splitters
-langchain-openai==0.1.6
+langchain-openai==0.1.8
     # via -r requirements.in
-langchain-text-splitters==0.0.1
-    # via langchain
-langchainhub==0.1.15
+langchain-text-splitters==0.2.1
+    # via
+    #   -r requirements.in
+    #   langchain
+langchainhub==0.1.18
     # via -r requirements.in
 langdetect==1.0.9
     # via unstructured
-langsmith==0.1.54
+langsmith==0.1.76
     # via
     #   langchain
     #   langchain-community
     #   langchain-core
-lxml==5.2.1
+lxml==5.2.2
     # via unstructured
 markdown==3.6
     # via -r requirements.in
-marshmallow==3.21.2
+marshmallow==3.21.3
     # via
     #   dataclasses-json
     #   unstructured-client
@@ -150,6 +151,8 @@ mypy-extensions==1.0.0
     # via
     #   typing-inspect
     #   unstructured-client
+nest-asyncio==1.6.0
+    # via unstructured-client
 nltk==3.8.1
     # via unstructured
 numpy==1.26.4
@@ -158,11 +161,11 @@ numpy==1.26.4
     #   langchain
     #   langchain-community
     #   unstructured
-openai==1.25.1
+openai==1.33.0
     # via langchain-openai
 ordered-set==4.1.0
     # via deepdiff
-orjson==3.10.3
+orjson==3.10.4
     # via langsmith
 packaging==23.2
     # via
@@ -172,13 +175,13 @@ packaging==23.2
     #   unstructured-client
 pip-tools==7.4.1
     # via -r requirements.in
-pydantic==2.7.1
+pydantic==2.7.3
     # via
     #   langchain
     #   langchain-core
     #   langsmith
     #   openai
-pydantic-core==2.18.2
+pydantic-core==2.18.4
     # via pydantic
 pypdf==4.2.0
     # via unstructured-client
@@ -197,21 +200,24 @@ pyyaml==6.0.1
     #   langchain
     #   langchain-community
     #   langchain-core
-rapidfuzz==3.9.0
+rapidfuzz==3.9.3
     # via unstructured
-regex==2024.4.28
+regex==2024.5.15
     # via
     #   nltk
     #   tiktoken
-requests==2.31.0
+requests==2.32.3
     # via
     #   langchain
     #   langchain-community
     #   langchainhub
     #   langsmith
+    #   requests-toolbelt
     #   tiktoken
     #   unstructured
     #   unstructured-client
+requests-toolbelt==1.0.0
+    # via unstructured-client
 six==1.16.0
     # via
     #   langdetect
@@ -224,7 +230,7 @@ sniffio==1.3.1
     #   openai
 soupsieve==2.5
     # via beautifulsoup4
-sqlalchemy==2.0.29
+sqlalchemy==2.0.30
     # via
     #   langchain
     #   langchain-community
@@ -232,13 +238,15 @@ sqlparse==0.5.0
     # via django
 tabulate==0.9.0
     # via unstructured
-tenacity==8.2.3
+tenacity==8.3.0
     # via
     #   langchain
     #   langchain-community
     #   langchain-core
-tiktoken==0.6.0
-    # via langchain-openai
+tiktoken==0.7.0
+    # via
+    #   -r requirements.in
+    #   langchain-openai
 tomli==2.0.1
     # via
     #   build
@@ -247,12 +255,13 @@ tqdm==4.66.4
     # via
     #   nltk
     #   openai
-types-requests==2.31.0.20240406
+types-requests==2.32.0.20240602
     # via langchainhub
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via
     #   anyio
     #   asgiref
+    #   emoji
     #   openai
     #   pydantic
     #   pydantic-core
@@ -265,9 +274,9 @@ typing-inspect==0.9.0
     # via
     #   dataclasses-json
     #   unstructured-client
-unstructured==0.13.6
+unstructured==0.14.5
     # via -r requirements.in
-unstructured-client==0.22.0
+unstructured-client==0.23.3
     # via unstructured
 urllib3==2.2.1
     # via

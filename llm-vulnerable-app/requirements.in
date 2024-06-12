@@ -13,3 +13,5 @@ faiss-cpu
 langchainhub
 fake_useragent
 beautifulsoup4
+langchain-text-splitters
+tiktoken
