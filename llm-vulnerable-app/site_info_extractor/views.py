@@ -1,12 +1,12 @@
 import logging
 
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 
 from llm.llm_manager import LLMManager
 from llm.protectors.protector_utils import get_protector
-from transaction_manager.models import Transaction
 
 _QUESTION_INSTRUCTION_RETRIEVER = 'You are a website reader. Answer a question about the content.'
 _QUESTION_INSTRUCTION_RAG = 'You are a website reader. Answer a user question about the page.\nURL: {url}'
@@ -35,7 +35,7 @@ def _get_site_url(request):
 
 
 class AskQuestionOnSiteRetrieverView(APIView):
-    queryset = Transaction.objects.none()
+    queryset = User.objects.none()
 
     # noinspection PyMethodMayBeStatic
     def get(self, request):
@@ -51,7 +51,7 @@ class AskQuestionOnSiteRetrieverView(APIView):
         try:
             llm = LLMManager(protector=get_protector(request))
             answer = llm.answer_question_on_web_page_with_retriever(instruction, prompt_args,
-                                                                           embedding=use_embeddings)
+                                                                    embedding=use_embeddings)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
@@ -65,7 +65,7 @@ class AskQuestionOnSiteRetrieverView(APIView):
 
 
 class AskQuestionOnSiteRagView(APIView):
-    queryset = Transaction.objects.none()
+    queryset = User.objects.none()
 
     # noinspection PyMethodMayBeStatic
     def get(self, request):
