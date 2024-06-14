@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.http import JsonResponse
+from django.http import HttpResponse
 from rest_framework.views import APIView
 
 
@@ -12,4 +12,4 @@ class PingView(APIView):
 
     # noinspection PyMethodMayBeStatic
     def get(self, request):
-        return JsonResponse("OK", status=200)
+        return HttpResponse("OK", status=200)
