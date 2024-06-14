@@ -38,15 +38,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'transaction_manager',
     'site_info_extractor'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -119,7 +121,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-STATIC_URL = 'static/'
+STATIC_URL = 'api/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static_preloaded']
 
 # Default primary key field type
@@ -162,6 +164,8 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 LLM_TYPE = os.environ.get('LLM_TYPE', 'azure_openai')
 LLM_API_KEY = os.environ.get('LLM_API_KEY', '')
