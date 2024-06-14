@@ -1,21 +1,23 @@
 <template>
   <div>
-    <table class="styled-table">
-      <thead>
-      <tr>
-        <th>Date</th>
-        <th>Amount</th>
-        <th>Description</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="transaction in transactions" :key="transaction.created_at">
-        <td>{{ transaction.date }}</td>
-        <td>{{ transaction.amount }}</td>
-        <td>{{ transaction.description }}</td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table class="styled-table">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="transaction in transactions" :key="transaction.created_at">
+          <td>{{ transaction.date }}</td>
+          <td>{{ transaction.amount }}</td>
+          <td>{{ transaction.description }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="transaction-form">
       <form @submit.prevent="addTransaction">
@@ -55,6 +57,9 @@ const addTransaction = () => {
 }
 </script>
 <style scoped>
+.table-container {
+  padding-bottom: 100px;
+}
 .styled-table {
   width: 100%;
   border-collapse: collapse;
