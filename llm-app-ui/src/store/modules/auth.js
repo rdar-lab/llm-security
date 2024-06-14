@@ -11,7 +11,7 @@ export default {
             state.password = password;
             state.authenticated = true;
         },
-        logout(state) {
+        clearCredentials(state) {
             state.username = null;
             state.password = null;
             state.authenticated = false;
@@ -34,13 +34,18 @@ export default {
                         return response;
                     })
                     .then(response => {
-                        alert(response.status);
                         commit('saveCredentials', { username, password });
                         resolve(response);
                     })
                     .catch(error => {
                         reject(error);
                     });
+            });
+        },
+        logout({ commit }) {
+            return new Promise((resolve, reject) => {
+                commit('clearCredentials');
+                resolve();
             });
         }
     },
