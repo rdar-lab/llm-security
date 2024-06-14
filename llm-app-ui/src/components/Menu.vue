@@ -14,8 +14,8 @@ const isAuthenticated = computed(() => store.getters['auth/isAuthenticated'])
   <header v-if="isAuthenticated">
     <div class="wrapper">
       <nav>
+        <RouterLink to="/txManager">Tx-Manager</RouterLink>
         <RouterLink to="/siteInfo">Site-Info</RouterLink>
-        <RouterLink to="/transactionManager">Tx-Manager</RouterLink>
         <Logout />
       </nav>
     </div>

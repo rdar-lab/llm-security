@@ -28,7 +28,7 @@ const handleSubmit = () => {
   const payload = { username: username.value, password: password.value }
   store.dispatch('auth/login', payload)
       .then(() => {
-        router.push('/siteInfo')
+        router.push('/txManager')
       })
       .catch((error) => {
             console.error(error)

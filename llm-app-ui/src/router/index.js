@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import SiteInfoView from '../views/SiteInfoView.vue'
+import TxManagerView from '../views/TxManagerView.vue'
 import LoginView from "@/views/LoginView.vue";
 import store from "@/store/store.js";
 
@@ -10,6 +11,11 @@ const router = createRouter({
       path: '/siteInfo',
       name: 'siteInfo',
       component: SiteInfoView
+    },
+    {
+      path: '/txManager',
+      name: 'txManager',
+      component: TxManagerView
     },
     {
       path: '/login',
