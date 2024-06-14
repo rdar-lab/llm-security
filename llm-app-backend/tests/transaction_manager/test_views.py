@@ -7,7 +7,7 @@ from transaction_manager.serializers import TransactionSerializer
 
 class TransactionsViewTestCase(TestBase):
     def test_get_all_transactions(self):
-        response = self.client.get('/transaction_manager/transaction/')
+        response = self.client.get('/api/transaction_manager/transaction/')
         transactions = Transaction.objects.all()
         serializer = TransactionSerializer(transactions, many=True)
         self.assertEqual(serializer.data, response.data)
@@ -19,5 +19,5 @@ class TransactionsViewTestCase(TestBase):
             'description': 'test Description',
             # Add all necessary fields here
         }
-        response = self.client.post('/transaction_manager/transaction/', data=data)
+        response = self.client.post('/api/transaction_manager/transaction/', data=data)
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)

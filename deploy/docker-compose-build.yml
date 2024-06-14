@@ -1,7 +1,14 @@
 version: '3'
 services:
-  llm-vulnerable-app:
+  llm-app-backend:
     build:
-      context: ../llm-vulnerable-app/
+      context: ../llm-app-backend/
       dockerfile: ./deploy/Dockerfile
-
+  llm-app-ui:
+    build:
+      context: ../llm-app-ui/
+      dockerfile: ./deploy/Dockerfile
+  proxy:
+    build:
+      context: ../proxy
+      dockerfile: ./deploy/Dockerfile

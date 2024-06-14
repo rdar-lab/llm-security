@@ -19,9 +19,9 @@ from django.urls import path, include
 from .views import PingView
 
 urlpatterns = [
-    path('ping/', PingView.as_view(), name='ping'),
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-    path('transaction_manager/', include('transaction_manager.urls')),
-    path('site_info/', include('site_info_extractor.urls')),
+    path('api/ping/', PingView.as_view(), name='ping'),
+    path('api/admin/', admin.site.urls),
+    path('api/api-auth/', include('rest_framework.urls')),
+    path('api/transaction_manager/', include('transaction_manager.urls')),
+    path('api/site_info/', include('site_info_extractor.urls')),
 ]
