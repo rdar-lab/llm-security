@@ -2,12 +2,12 @@
   <div>
     <div class="question-form">
       <form @submit.prevent="askQuestion">
-        <select v-model="question.mode">
+        <select v-model="question.mode" required>
           <option v-for="option in modeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
         </select>
-        <input v-model="question.query" type="text" placeholder="Ask a question" required>
+        <input v-model="question.query" type="text" placeholder="Ask a question (Example: What is my balance?)" required>
         <button type="submit" :disabled="isLoading">
           <span>Ask</span>
           <span v-if="isLoading" class="spinner"></span>

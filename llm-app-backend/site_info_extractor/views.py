@@ -47,11 +47,13 @@ class AskQuestionOnSiteRetrieverView(APIView):
         use_embeddings = _get_use_embedding(request)
 
         answer = None
+        parsed_answer = None
         error = None
         try:
             llm = LLMManager(protector=get_protector(request))
             answer = llm.answer_question_on_web_page_with_retriever(instruction, prompt_args,
                                                                     embedding=use_embeddings)
+            parsed_answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
@@ -60,6 +62,7 @@ class AskQuestionOnSiteRetrieverView(APIView):
             "prompt_args": prompt_args,
             "use_embeddings": use_embeddings,
             "answer": answer,
+            "parsed_answer": parsed_answer,
             "error": error
         }, json_dumps_params={"default": lambda x: vars(x)})
 
@@ -76,10 +79,12 @@ class AskQuestionOnSiteRagView(APIView):
         instruction = _QUESTION_INSTRUCTION_RAG
 
         answer = None
+        parsed_answer = None
         error = None
         try:
             llm = LLMManager(protector=get_protector(request))
             answer = llm.answer_question_on_web_page_with_rag(instruction, prompt_args)
+            parsed_answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
@@ -87,5 +92,6 @@ class AskQuestionOnSiteRagView(APIView):
             "prompt": instruction,
             "prompt_args": prompt_args,
             "answer": answer,
+            "parsed_answer": parsed_answer,
             "error": error
         }, json_dumps_params={"default": lambda x: vars(x)})

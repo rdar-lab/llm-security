@@ -105,10 +105,13 @@ class LLMManager(ABC):
     @staticmethod
     def parse_answer(answer):
         if isinstance(answer, AIMessage):
-            return answer.content
+            return LLMManager.parse_answer(answer.content)
 
         if isinstance(answer, dict) and "output" in answer:
-            return answer["output"]
+            return LLMManager.parse_answer(answer["output"])
+
+        if isinstance(answer, dict) and "answer" in answer:
+            return LLMManager.parse_answer(answer["answer"])
 
         return str(answer)
 
