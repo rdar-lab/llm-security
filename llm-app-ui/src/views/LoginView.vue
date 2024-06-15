@@ -17,6 +17,7 @@
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import Swal from "sweetalert2";
 
 const username = ref('')
 const password = ref('')
@@ -30,9 +31,9 @@ const handleSubmit = () => {
       .then(() => {
         router.push('/txManager')
       })
-      .catch((error) => {
+      .catch(async (error) => {
             console.error(error)
-            alert('An error occurred during login.')
+            await Swal.fire('Access Denied', 'Invalid username or password', 'error')
           }
       )
 }
