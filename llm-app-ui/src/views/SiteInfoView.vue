@@ -48,6 +48,7 @@ const askQuestion = () => {
         await showAIResponse(response);
       })
       .catch(async error => {
+        console.log(error);
         await Swal.fire('Error', "Failed to ask question: " + error, 'error')
       })
       .then(() => {
