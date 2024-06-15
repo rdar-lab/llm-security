@@ -7,7 +7,8 @@
             {{ option.label }}
           </option>
         </select>
-        <input v-model="question.query" type="text" placeholder="Ask a question (Example: What is my balance?)" required>
+        <input v-model="question.query" type="text" placeholder="Ask a question (Example: What is my balance?)"
+               required>
         <button type="submit" :disabled="isLoading">
           <span>Ask</span>
           <span v-if="isLoading" class="spinner"></span>
@@ -46,9 +47,10 @@
 </template>
 
 <script setup>
-import { onMounted, computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import Swal from 'sweetalert2'
+import { showAIResponse } from "@/utils/AiUtils.js";
 
 const store = useStore()
 
@@ -63,13 +65,13 @@ const transactions = computed(() => store.getters['transactions/transactions'])
 const newTransaction = ref({ amount: 0, description: '' })
 
 const addTransaction = () => {
-  store.dispatch('transactions/addTransaction', {transaction: newTransaction.value})
+  store.dispatch('transactions/addTransaction', { transaction: newTransaction.value })
       .then(() => {
         refreshTransactions()
         newTransaction.value = { amount: 0, description: '' }
       })
       .catch(error => {
-        alert("Failed to add transaction: "+ error);
+        alert("Failed to add transaction: " + error);
       })
 }
 
@@ -85,22 +87,12 @@ const isLoading = ref(false)
 
 const askQuestion = () => {
   isLoading.value = true
-  store.dispatch('transactions/askQuestion', {mode: question.value.mode, query: question.value.query})
+  store.dispatch('transactions/askQuestion', { mode: question.value.mode, query: question.value.query })
       .then(async (response) => {
-        const parsedResponse = await response.json()
-        console.log(parsedResponse)
-        if (parsedResponse.error) {
-          await Swal.fire('Error', parsedResponse.error, 'error')
-        } else if (parsedResponse.parsed_answer) {
-          await Swal.fire('Answer', parsedResponse.parsed_answer, 'info')
-        } else if (parsedResponse.answer){
-          await Swal.fire('Answer', parsedResponse.answer, 'info')
-        } else {
-          await Swal.fire('Answer', JSON.stringify(parsedResponse), 'info')
-        }
+        await showAIResponse(response);
       })
       .catch(async error => {
-        await Swal.fire('Error', "Failed to ask question: "+ error, 'error')
+        await Swal.fire('Error', "Failed to ask question: " + error, 'error')
       })
       .then(() => {
         isLoading.value = false
@@ -124,6 +116,7 @@ const formatDate = (dateString) => {
 .table-container {
   padding-bottom: 100px;
 }
+
 .styled-table {
   width: 100%;
   border-collapse: collapse;
@@ -241,8 +234,13 @@ const formatDate = (dateString) => {
   vertical-align: middle;
   margin-left: 5px;
 }
+
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

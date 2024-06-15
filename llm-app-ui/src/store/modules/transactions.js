@@ -62,7 +62,7 @@ export default {
         },
         askQuestion({ dispatch, rootState }, { mode, query }) {
             const { username, password } = rootState.auth;
-            const {selectedProtector} = rootState.protections;
+            const { selectedProtector } = rootState.protections;
             const encodedCredentials = btoa(`${username}:${password}`);
             return new Promise((resolve, reject) => {
                 let url = null;

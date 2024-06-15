@@ -1,12 +1,13 @@
 <template>
-  <select v-model="selectedProtector"  class="protection-mode">
+  <select v-model="selectedProtector" class="protection-mode">
     <option v-for="(value, key) in protectors" :value="key">{{ value }}</option>
   </select>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useStore } from 'vuex'
+
 const store = useStore()
 
 const protectors = computed(() => store.getters['protections/getProtectors'])

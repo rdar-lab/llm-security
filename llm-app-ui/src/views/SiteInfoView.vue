@@ -27,6 +27,7 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 
 import Swal from "sweetalert2";
+import { showAIResponse } from "@/utils/AiUtils.js";
 
 const store = useStore()
 
@@ -44,20 +45,10 @@ const askQuestion = () => {
   isLoading.value = true
   store.dispatch('site/askQuestion', question.value)
       .then(async (response) => {
-        const parsedResponse = await response.json()
-        console.log(parsedResponse)
-        if (parsedResponse.error) {
-          await Swal.fire('Error', parsedResponse.error, 'error')
-        } else if (parsedResponse.parsed_answer) {
-          await Swal.fire('Answer', parsedResponse.parsed_answer, 'info')
-        } else if (parsedResponse.answer){
-          await Swal.fire('Answer', parsedResponse.answer, 'info')
-        } else {
-          await Swal.fire('Answer', JSON.stringify(parsedResponse), 'info')
-        }
+        await showAIResponse(response);
       })
       .catch(async error => {
-        await Swal.fire('Error', "Failed to ask question: "+ error, 'error')
+        await Swal.fire('Error', "Failed to ask question: " + error, 'error')
       })
       .then(() => {
         isLoading.value = false
@@ -144,8 +135,13 @@ button:hover {
   vertical-align: middle;
   margin-left: 5px;
 }
+
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

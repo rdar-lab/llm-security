@@ -1,13 +1,11 @@
 export default {
     namespaced: true,
-    state: {
-    },
-    mutations: {
-    },
+    state: {},
+    mutations: {},
     actions: {
         askQuestion({ dispatch, rootState }, { mode, siteUrl, query }) {
             const { username, password } = rootState.auth;
-            const {selectedProtector} = rootState.protections;
+            const { selectedProtector } = rootState.protections;
             const encodedCredentials = btoa(`${username}:${password}`);
             return new Promise((resolve, reject) => {
                 let url = null;
@@ -59,6 +57,5 @@ export default {
             });
         }
     },
-    getters: {
-    }
+    getters: {}
 }

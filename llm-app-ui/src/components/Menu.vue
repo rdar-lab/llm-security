@@ -17,8 +17,8 @@ const isAuthenticated = computed(() => store.getters['auth/isAuthenticated'])
       <nav>
         <RouterLink to="/txManager">Tx-Manager</RouterLink>
         <RouterLink to="/siteInfo">Site-Info</RouterLink>
-        <Logout />
-        <Protector />
+        <Logout/>
+        <Protector/>
       </nav>
     </div>
   </header>
