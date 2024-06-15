@@ -23,6 +23,7 @@ services:
     restart: unless-stopped
     links:
       - psql:psql
+      - payload:payload
     ports:
       - 8081:80
     volumes:
@@ -37,6 +38,14 @@ services:
       - 8082:80
     healthcheck:
       test: curl --fail http://localhost || kill 1
+      interval: 60s
+  payload:
+    image: local/payload:latest
+    restart: unless-stopped
+    ports:
+      - 8083:8080
+    healthcheck:
+      test: curl --fail http://localhost:8000 || kill 1
       interval: 60s
   proxy:
     image: local/proxy:latest

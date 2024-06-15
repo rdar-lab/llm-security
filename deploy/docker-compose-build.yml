@@ -8,6 +8,10 @@ services:
     build:
       context: ../llm-app-ui/
       dockerfile: ./deploy/Dockerfile
+  payload:
+    build:
+      context: ../llm-attack/
+      dockerfile: ./deploy/Dockerfile
   proxy:
     build:
       context: ../proxy
