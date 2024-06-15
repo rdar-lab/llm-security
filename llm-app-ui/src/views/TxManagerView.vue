@@ -73,7 +73,7 @@ const addTransaction = () => {
       })
 }
 
-const question = ref({ mode: 'rat', query: '' })
+const question = ref({ mode: 'rag', query: '' })
 
 const modeOptions = [
   { value: 'rag', label: 'RAG' },
