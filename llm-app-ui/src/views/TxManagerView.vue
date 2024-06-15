@@ -8,7 +8,10 @@
           </option>
         </select>
         <input v-model="question.query" type="text" placeholder="Ask a question" required>
-        <button type="submit">Ask</button>
+        <button type="submit" :disabled="isLoading">
+          <span>Ask</span>
+          <span v-if="isLoading" class="spinner"></span>
+        </button>
       </form>
     </div>
 
@@ -45,6 +48,7 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue'
 import { useStore } from 'vuex'
+import Swal from 'sweetalert2'
 
 const store = useStore()
 
@@ -77,21 +81,27 @@ const modeOptions = [
   { value: 'preloaded', label: 'Pre-Load' },
 ]
 
+const isLoading = ref(false)
+
 const askQuestion = () => {
+  isLoading.value = true
   store.dispatch('transactions/askQuestion', {mode: question.value.mode, query: question.value.query})
       .then(async (response) => {
         const parsedResponse = await response.json()
         console.log(parsedResponse)
         if (parsedResponse.parsed_answer) {
-          alert(parsedResponse.parsed_answer)
+          await Swal.fire('Answer', parsedResponse.parsed_answer, 'info')
         } else if (parsedResponse.answer){
-          alert(parsedResponse.answer)
+          await Swal.fire('Answer', parsedResponse.answer, 'info')
         } else {
-          alert(JSON.stringify(parsedResponse))
+          await Swal.fire('Answer', JSON.stringify(parsedResponse), 'info')
         }
       })
-      .catch(error => {
-        alert("Failed to ask question: "+ error);
+      .catch(async error => {
+        await Swal.fire('Error', "Failed to ask question: "+ error, 'error')
+      })
+      .then(() => {
+        isLoading.value = false
       })
 }
 
@@ -131,17 +141,13 @@ const formatDate = (dateString) => {
   color: white;
 }
 
-.alternate-row {
-  background-color: #f2f2f2;
-}
-
 .transaction-form {
   position: fixed;
   bottom: 0;
   width: 100%;
   background-color: #f2f2f2;
   padding: 20px;
-  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .transaction-form form {
@@ -179,7 +185,7 @@ const formatDate = (dateString) => {
 .question-form {
   background-color: #f2f2f2;
   padding: 20px;
-  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .question-form form {
@@ -220,5 +226,21 @@ const formatDate = (dateString) => {
 
 .amount-column {
   width: 150px;
+}
+
+.spinner {
+  display: inline-block;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  animation: spin 2s linear infinite;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

@@ -69,8 +69,11 @@ export default {
                     url = '/api/transaction_manager/ask-rat/';
                 } else if (mode === "preloaded") {
                     url = '/api/transaction_manager/ask-preloaded/';
-                } else {
+                } else if (mode === "sql") {
                     url = '/api/transaction_manager/ask-sql/';
+                } else {
+                    reject(new Error(`Invalid mode: ${mode}`));
+                    return;
                 }
 
                 url += '?query=' + encodeURIComponent(query);
