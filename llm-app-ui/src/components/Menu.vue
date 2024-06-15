@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import Logout from './Logout.vue'
+import Protector from './Protector.vue'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
@@ -17,6 +18,7 @@ const isAuthenticated = computed(() => store.getters['auth/isAuthenticated'])
         <RouterLink to="/txManager">Tx-Manager</RouterLink>
         <RouterLink to="/siteInfo">Site-Info</RouterLink>
         <Logout />
+        <Protector />
       </nav>
     </div>
   </header>

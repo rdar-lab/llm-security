@@ -62,11 +62,12 @@ export default {
         },
         askQuestion({ dispatch, rootState }, { mode, query }) {
             const { username, password } = rootState.auth;
+            const {selectedProtector} = rootState.protections;
             const encodedCredentials = btoa(`${username}:${password}`);
             return new Promise((resolve, reject) => {
                 let url = null;
-                if (mode === "rat") {
-                    url = '/api/transaction_manager/ask-rat/';
+                if (mode === "rag") {
+                    url = '/api/transaction_manager/ask-rag/';
                 } else if (mode === "preloaded") {
                     url = '/api/transaction_manager/ask-preloaded/';
                 } else if (mode === "sql") {
@@ -77,6 +78,10 @@ export default {
                 }
 
                 url += '?query=' + encodeURIComponent(query);
+
+                if (selectedProtector !== 'none') {
+                    url += '&protector=' + selectedProtector;
+                }
 
                 fetch(url, {
                     method: 'GET',

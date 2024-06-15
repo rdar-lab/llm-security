@@ -76,7 +76,7 @@ const addTransaction = () => {
 const question = ref({ mode: 'rat', query: '' })
 
 const modeOptions = [
-  { value: 'rat', label: 'RAT' },
+  { value: 'rag', label: 'RAG' },
   { value: 'sql', label: 'Gen-SQL' },
   { value: 'preloaded', label: 'Pre-Load' },
 ]
@@ -89,7 +89,9 @@ const askQuestion = () => {
       .then(async (response) => {
         const parsedResponse = await response.json()
         console.log(parsedResponse)
-        if (parsedResponse.parsed_answer) {
+        if (parsedResponse.error) {
+          await Swal.fire('Error', parsedResponse.error, 'error')
+        } else if (parsedResponse.parsed_answer) {
           await Swal.fire('Answer', parsedResponse.parsed_answer, 'info')
         } else if (parsedResponse.answer){
           await Swal.fire('Answer', parsedResponse.answer, 'info')
