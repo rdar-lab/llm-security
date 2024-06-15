@@ -52,11 +52,11 @@ _PRELOADED_INSTRUCTION = \
     """
 
 
-def _get_search_text(request):
-    search_text = request.GET.get('search_text', '')
-    if search_text is None or len(search_text) == 0:
-        raise ValidationError('Invalid search text')
-    return search_text
+def _get_query(request):
+    query = request.GET.get('query', '')
+    if query is None or len(query) == 0:
+        raise ValidationError('Invalid query')
+    return query
 
 
 class TransactionsView(generics.ListCreateAPIView):
@@ -68,18 +68,19 @@ class TransactionsView(generics.ListCreateAPIView):
 
 
 # Question answering based on RAT (Retrieval Augmented Thoughts)
-class TransactionAskView(APIView):
+class TransactionAskRATView(APIView):
     queryset = Transaction.objects.none()
 
     def get(self, request):
         current_user_id = request.user.id
-        search_text = _get_search_text(request)
+        query = _get_query(request)
 
         answer = None
+        parsed_answer = None
         error = None
 
         prompt_args = {
-            "query": search_text,
+            "query": query,
             "user_id": current_user_id
         }
 
@@ -87,6 +88,7 @@ class TransactionAskView(APIView):
             llm = LLMManager(protector=get_protector(request))
             # Use llm helper to answer the question
             answer = llm.answer_question_on_db_with_rag(_QUESTION_INSTRUCTION, prompt_args)
+            parsed_answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
@@ -94,6 +96,7 @@ class TransactionAskView(APIView):
             "prompt": _QUESTION_INSTRUCTION,
             "prompt_args": prompt_args,
             "answer": answer,
+            "parsed_answer": parsed_answer,
             "error": error
         }, json_dumps_params={"default": lambda x: vars(x)})
 
@@ -103,7 +106,7 @@ class TransactionAskPreloadedView(APIView):
     queryset = Transaction.objects.none()
 
     def get(self, request):
-        search_text = _get_search_text(request)
+        query = _get_query(request)
 
         prompt_args = None
         answer = None
@@ -116,7 +119,7 @@ class TransactionAskPreloadedView(APIView):
             )
             prompt_args = {
                 "data": data,
-                "query": search_text,
+                "query": query,
             }
 
             llm = LLMManager(protector=get_protector(request))
@@ -135,7 +138,7 @@ class TransactionAskPreloadedView(APIView):
 
 
 # LLM as SQL generation engine
-class TransactionSearchView(generics.ListAPIView):
+class TransactionAskSQLView(generics.ListAPIView):
     queryset = Transaction.objects.none()
     serializer_class = TransactionSerializer
 
@@ -154,10 +157,10 @@ class TransactionSearchView(generics.ListAPIView):
 
         try:
             current_user_id = self.request.user.id
-            search_text = _get_search_text(request)
+            query = _get_query(request)
             engine = settings.DATABASES['default']['ENGINE']
             prompt_args = {
-                "query": search_text,
+                "query": query,
                 "user_id": current_user_id,
                 "db_type": engine
             }

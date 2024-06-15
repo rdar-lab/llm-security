@@ -59,6 +59,46 @@ export default {
                         reject(error);
                     });
             });
+        },
+        askQuestion({ dispatch, rootState }, { mode, query }) {
+            const { username, password } = rootState.auth;
+            const encodedCredentials = btoa(`${username}:${password}`);
+            return new Promise((resolve, reject) => {
+                let url = null;
+                if (mode === "rat") {
+                    url = '/api/transaction_manager/ask-rat/';
+                } else if (mode === "preloaded") {
+                    url = '/api/transaction_manager/ask-preloaded/';
+                } else {
+                    url = '/api/transaction_manager/ask-sql/';
+                }
+
+                url += '?query=' + encodeURIComponent(query);
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${encodedCredentials}`
+                    }
+                })
+                    .then(async response => {
+                        if (!response.ok) {
+                            let errorMsg = await response.text();
+                            if (!errorMsg) {
+                                errorMsg = `HTTP error! status: ${response.status}`
+                            }
+                            throw new Error(errorMsg);
+                        }
+                        return response;
+                    })
+                    .then((response) => {
+                        resolve(response);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
         }
     },
     getters: {
