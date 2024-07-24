@@ -9,12 +9,12 @@ export default {
             const encodedCredentials = btoa(`${username}:${password}`);
             return new Promise((resolve, reject) => {
                 let url = null;
-                if (mode === "rag") {
-                    url = '/api/site_info/ask-with-rag/';
-                } else if (mode === "retriever") {
-                    url = '/api/site_info/ask-with-retriever/';
-                } else if (mode === "retriever-embedding") {
-                    url = '/api/site_info/ask-with-retriever/';
+                if (mode === "react") {
+                    url = '/api/site_info/ask-with-react/';
+                } else if (mode === "preloaded") {
+                    url = '/api/site_info/ask-with-data/';
+                } else if (mode === "rag") {
+                    url = '/api/site_info/ask-with-data/';
                 } else {
                     reject(new Error(`Invalid mode: ${mode}`));
                     return;
@@ -23,8 +23,10 @@ export default {
                 url += '?site_url=' + encodeURIComponent(siteUrl);
                 url += '&question=' + encodeURIComponent(query);
 
-                if (mode === "retriever-embedding") {
-                    url += '&use_embeddings=true';
+                if (mode === "rag") {
+                    url += '&rag=true';
+                } else if (mode === "preloaded") {
+                    url += '&rag=false';
                 }
 
                 if (selectedProtector !== 'none') {

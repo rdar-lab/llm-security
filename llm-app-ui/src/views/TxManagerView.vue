@@ -75,12 +75,12 @@ const addTransaction = () => {
       })
 }
 
-const question = ref({ mode: 'rag', query: '' })
+const question = ref({ mode: 'react', query: '' })
 
 const modeOptions = [
-  { value: 'rag', label: 'RAG' },
+  { value: 'react', label: 'Re-ACT' },
   { value: 'sql', label: 'Gen-SQL' },
-  { value: 'preloaded', label: 'Pre-Load' },
+  { value: 'preloaded', label: 'Preloaded' },
 ]
 
 const isLoading = ref(false)

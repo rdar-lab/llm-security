@@ -8,15 +8,15 @@ from rest_framework.views import APIView
 from llm.llm_manager import LLMManager
 from llm.protectors.protector_utils import get_protector
 
-_QUESTION_INSTRUCTION_RETRIEVER = 'You are a website reader. Answer a question about the content.'
-_QUESTION_INSTRUCTION_RAG = 'You are a website reader. Answer a user question about the page.\nURL: {url}'
+_QUESTION_INSTRUCTION_WITH_DATA = 'You are a website reader. Answer a question about the content.'
+_QUESTION_INSTRUCTION_REACT = 'You are a website reader. Answer a user question about the page.\nURL: {url}'
 
 _logger = logging.getLogger(__name__)
 
 
-def _get_use_embedding(request):
-    use_embeddings_str = request.GET.get('use_embeddings', 'false')
-    use_embeddings = use_embeddings_str.lower() == 'true' or use_embeddings_str == '1'
+def _get_use_rag(request):
+    use_rag_str = request.GET.get('rag', 'false')
+    use_embeddings = use_rag_str.lower() == 'true' or use_rag_str == '1'
     return use_embeddings
 
 
@@ -34,7 +34,7 @@ def _get_site_url(request):
     return site_url
 
 
-class AskQuestionOnSiteRetrieverView(APIView):
+class AskQuestionOnSiteWithDataView(APIView):
     queryset = User.objects.none()
 
     # noinspection PyMethodMayBeStatic
@@ -43,16 +43,16 @@ class AskQuestionOnSiteRetrieverView(APIView):
         question = _get_question(request)
 
         prompt_args = {"url": site_url, "query": question}
-        instruction = _QUESTION_INSTRUCTION_RETRIEVER
-        use_embeddings = _get_use_embedding(request)
+        instruction = _QUESTION_INSTRUCTION_WITH_DATA
+        use_rag = _get_use_rag(request)
 
         answer = None
         parsed_answer = None
         error = None
         try:
             llm = LLMManager(protector=get_protector(request))
-            answer = llm.answer_question_on_web_page_with_retriever(instruction, prompt_args,
-                                                                    embedding=use_embeddings)
+            answer = llm.answer_question_on_web_page_with_data(instruction, prompt_args,
+                                                               rag=use_rag)
             parsed_answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")
@@ -60,14 +60,14 @@ class AskQuestionOnSiteRetrieverView(APIView):
         return JsonResponse({
             "prompt": instruction,
             "prompt_args": prompt_args,
-            "use_embeddings": use_embeddings,
+            "use_rag": use_rag,
             "answer": answer,
             "parsed_answer": parsed_answer,
             "error": error
         }, json_dumps_params={"default": lambda x: vars(x)})
 
 
-class AskQuestionOnSiteRagView(APIView):
+class AskQuestionOnSiteReactView(APIView):
     queryset = User.objects.none()
 
     # noinspection PyMethodMayBeStatic
@@ -76,14 +76,14 @@ class AskQuestionOnSiteRagView(APIView):
         question = _get_question(request)
 
         prompt_args = {"url": site_url, "query": question}
-        instruction = _QUESTION_INSTRUCTION_RAG
+        instruction = _QUESTION_INSTRUCTION_REACT
 
         answer = None
         parsed_answer = None
         error = None
         try:
             llm = LLMManager(protector=get_protector(request))
-            answer = llm.answer_question_on_web_page_with_rag(instruction, prompt_args)
+            answer = llm.answer_question_on_web_page_with_react(instruction, prompt_args)
             parsed_answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")

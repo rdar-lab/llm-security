@@ -66,8 +66,8 @@ export default {
             const encodedCredentials = btoa(`${username}:${password}`);
             return new Promise((resolve, reject) => {
                 let url = null;
-                if (mode === "rag") {
-                    url = '/api/transaction_manager/ask-rag/';
+                if (mode === "react") {
+                    url = '/api/transaction_manager/ask-react/';
                 } else if (mode === "preloaded") {
                     url = '/api/transaction_manager/ask-preloaded/';
                 } else if (mode === "sql") {

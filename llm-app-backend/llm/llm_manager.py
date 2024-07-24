@@ -152,7 +152,7 @@ class LLMManager(ABC):
         _logger.info(f"Answer: {answer}")
         return answer
 
-    def answer_question_on_db_with_rag(self, instruction_template, input_variables):
+    def answer_question_on_db_with_react(self, instruction_template, input_variables):
         agent = create_sql_agent(self.__llm, db=self.__get_db(), verbose=True,
                                  agent_executor_kwargs={"return_intermediate_steps": True})
         return self.__run_llm(agent, instruction_template, input_variables)
@@ -160,19 +160,19 @@ class LLMManager(ABC):
     def answer_question(self, instruction_template, input_variables):
         return self.__run_llm(self.__llm, instruction_template, input_variables)
 
-    def answer_question_on_web_page_with_retriever(self, instruction_template, input_variables, embedding=True):
+    def answer_question_on_web_page_with_data(self, instruction_template, input_variables, rag=True):
         documents = website_reader.read_from_url(input_variables['url'])
         return self.__answer_question_on_documents(documents, instruction_template, input_variables,
-                                                   embedding=embedding)
+                                                   rag=rag)
 
-    def answer_question_on_web_page_with_rag(self, instruction_template, input_variables):
-        return self.__answer_question_with_tools(
+    def answer_question_on_web_page_with_react(self, instruction_template, input_variables):
+        return self.__answer_question_with_react(
             [reader_tool.SimpleReaderTool(), reader_tool.ReaderTool()],
             instruction_template,
             input_variables
         )
 
-    def __chain_for_retriever(self, documents):
+    def __chain_for_rag(self, documents):
         if len(documents) == 0 or (len(documents) == 1 and documents[0].page_content == ""):
             raise Exception("No content found in the document")
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -184,9 +184,9 @@ class LLMManager(ABC):
                                                             max_tokens_limit=_MAX_TOKENS)
         return chain
 
-    def __answer_question_on_documents(self, documents, instruction_template, input_variables, embedding=True):
-        if embedding:
-            chain = self.__chain_for_retriever(documents)
+    def __answer_question_on_documents(self, documents, instruction_template, input_variables, rag=True):
+        if rag:
+            chain = self.__chain_for_rag(documents)
 
             return self.__run_llm(chain, instruction_template, input_variables)
         else:
@@ -196,7 +196,7 @@ class LLMManager(ABC):
                 page_content = page_content[:_MAX_CHARS]
             return self.answer_question(instruction_template, {**input_variables, "data": page_content})
 
-    def __answer_question_with_tools(self, tools, instruction_template, input_variables):
+    def __answer_question_with_react(self, tools, instruction_template, input_variables):
         prompt = hub.pull("hwchase17/structured-chat-agent")
         agent = create_structured_chat_agent(
             self.__llm,

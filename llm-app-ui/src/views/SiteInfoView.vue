@@ -31,12 +31,12 @@ import { showAIResponse } from "@/utils/AiUtils.js";
 
 const store = useStore()
 
-const question = ref({ mode: 'rag', siteUrl: '', query: '' })
+const question = ref({ mode: 'react', siteUrl: '', query: '' })
 
 const modeOptions = [
+  { value: 'react', label: 'Re-ACT' },
   { value: 'rag', label: 'RAG' },
-  { value: 'retriever', label: 'Retriever' },
-  { value: 'retriever-embedding', label: 'Retriever - With Embedding' },
+  { value: 'preloaded', label: 'Preloaded' },
 ]
 
 const isLoading = ref(false)

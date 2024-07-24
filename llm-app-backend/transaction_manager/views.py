@@ -14,7 +14,7 @@ from .serializers import TransactionSerializer
 
 _logger = logging.getLogger(__name__)
 
-_RAG_INSTRUCTION = \
+_REACT_INSTRUCTION = \
     """
     You are a banker answering questions about transactions of the user.
     Only answer questions related to the table 'transaction_manager_transaction.
@@ -67,8 +67,8 @@ class TransactionsView(generics.ListCreateAPIView):
         return Transaction.objects.filter(user=self.request.user)
 
 
-# Question answering based on RAG (Retrieval Augmented Generation)
-class TransactionAskRAGView(APIView):
+# Question answering based on Re-Act
+class TransactionAskReactView(APIView):
     queryset = Transaction.objects.none()
 
     def get(self, request):
@@ -87,13 +87,13 @@ class TransactionAskRAGView(APIView):
         try:
             llm = LLMManager(protector=get_protector(request))
             # Use llm helper to answer the question
-            answer = llm.answer_question_on_db_with_rag(_RAG_INSTRUCTION, prompt_args)
+            answer = llm.answer_question_on_db_with_react(_REACT_INSTRUCTION, prompt_args)
             parsed_answer = llm.parse_answer(answer)
         except Exception as e:
             _logger.exception("Error while answering the question")
             error = repr(e)
         return JsonResponse({
-            "prompt": _RAG_INSTRUCTION,
+            "prompt": _REACT_INSTRUCTION,
             "prompt_args": prompt_args,
             "answer": answer,
             "parsed_answer": parsed_answer,
@@ -138,7 +138,7 @@ class TransactionAskPreloadedView(APIView):
 
 
 # LLM as SQL generation engine
-class TransactionAskSQLView(generics.ListAPIView):
+class TransactionAskGenSQLView(generics.ListAPIView):
     queryset = Transaction.objects.none()
     serializer_class = TransactionSerializer
 
