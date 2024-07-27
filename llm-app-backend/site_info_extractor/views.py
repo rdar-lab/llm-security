@@ -35,6 +35,9 @@ def _get_site_url(request):
 
 
 class AskQuestionOnSiteWithDataView(APIView):
+    """
+    Ask a question about a website with data (preloaded/RAG)
+    """
     queryset = User.objects.none()
 
     # noinspection PyMethodMayBeStatic
@@ -68,6 +71,9 @@ class AskQuestionOnSiteWithDataView(APIView):
 
 
 class AskQuestionOnSiteReactView(APIView):
+    """
+    Ask a question about a website with React chain
+    """
     queryset = User.objects.none()
 
     # noinspection PyMethodMayBeStatic

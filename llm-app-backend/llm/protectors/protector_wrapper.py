@@ -6,6 +6,9 @@ _logger = logging.getLogger(__name__)
 
 
 class LLMProtectorWrapper(LLMProtector):
+    """
+    A protector that wraps the user input and data in a prefix and postfix
+    """
 
     def __init__(
             self,

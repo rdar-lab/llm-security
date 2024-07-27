@@ -9,6 +9,12 @@ _logger = logging.getLogger(__name__)
 
 
 def get_protector(request):
+    """
+    Get the protector based on the request
+
+    :param request:
+    :return:
+    """
     protector = request.GET.get('protector', '')
     if protector is None or len(protector) == 0:
         return None

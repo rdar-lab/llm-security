@@ -6,6 +6,9 @@ _logger = logging.getLogger(__name__)
 
 
 class LLMProtectorRepeat(LLMProtector):
+    """
+    A protector that repeats the instruction
+    """
 
     def __init__(self, repeat=1):
         super().__init__()

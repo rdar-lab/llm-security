@@ -60,6 +60,9 @@ def _get_query(request):
 
 
 class TransactionsView(generics.ListCreateAPIView):
+    """
+    API endpoint that allows transactions to be listed or created.
+    """
     serializer_class = TransactionSerializer
 
     def get_queryset(self):
@@ -69,6 +72,9 @@ class TransactionsView(generics.ListCreateAPIView):
 
 # Question answering based on Re-Act
 class TransactionAskReactView(APIView):
+    """
+    Ask a question about transactions with Re-Act chain
+    """
     queryset = Transaction.objects.none()
 
     def get(self, request):
@@ -103,6 +109,9 @@ class TransactionAskReactView(APIView):
 
 # Question asking with data preloaded
 class TransactionAskPreloadedView(APIView):
+    """
+    Ask a question about transactions with data (preloaded)
+    """
     queryset = Transaction.objects.none()
 
     def get(self, request):
@@ -139,6 +148,9 @@ class TransactionAskPreloadedView(APIView):
 
 # LLM as SQL generation engine
 class TransactionAskGenSQLView(generics.ListAPIView):
+    """
+    Ask a question about transactions with SQL generation
+    """
     queryset = Transaction.objects.none()
     serializer_class = TransactionSerializer
 

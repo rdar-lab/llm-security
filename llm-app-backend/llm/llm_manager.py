@@ -27,6 +27,10 @@ _logger = logging.getLogger(__name__)
 
 
 class LLMManager(ABC):
+    """
+    LLM manager is the facade for the LLM system
+    """
+
     __db_url = None
 
     def __init__(self, protector: Optional[LLMProtector] = None):
@@ -104,6 +108,12 @@ class LLMManager(ABC):
 
     @staticmethod
     def parse_answer(answer):
+        """
+        Parse the answer from the LLM
+
+        :param answer:
+        :return:
+        """
         if isinstance(answer, AIMessage):
             return LLMManager.parse_answer(answer.content)
 
@@ -134,6 +144,15 @@ class LLMManager(ABC):
         return instruction, input_variables
 
     def __run_llm(self, model, app_instruction, user_input_variables, wrap_prompt=False):
+        """
+        Runs the LLM
+
+        :param model:
+        :param app_instruction:
+        :param user_input_variables:
+        :param wrap_prompt:
+        :return:
+        """
         _logger.info(f"Running in LLM: {app_instruction}. Variables={user_input_variables}")
 
         system_instruction_template, system_input_variables = \
@@ -153,19 +172,48 @@ class LLMManager(ABC):
         return answer
 
     def answer_question_on_db_with_react(self, instruction_template, input_variables):
+        """
+        Runs LLM with react SQL chain
+
+        :param instruction_template:
+        :param input_variables:
+        :return:
+        """
         agent = create_sql_agent(self.__llm, db=self.__get_db(), verbose=True,
                                  agent_executor_kwargs={"return_intermediate_steps": True})
         return self.__run_llm(agent, instruction_template, input_variables)
 
     def answer_question(self, instruction_template, input_variables):
+        """
+        Runs a simple LLM question
+        
+        :param instruction_template: 
+        :param input_variables: 
+        :return: 
+        """
         return self.__run_llm(self.__llm, instruction_template, input_variables)
 
     def answer_question_on_web_page_with_data(self, instruction_template, input_variables, rag=True):
+        """
+        Runs a question with web page data (preload or RAG)
+
+        :param instruction_template:
+        :param input_variables:
+        :param rag:
+        :return:
+        """
         documents = website_reader.read_from_url(input_variables['url'])
         return self.__answer_question_on_documents(documents, instruction_template, input_variables,
                                                    rag=rag)
 
     def answer_question_on_web_page_with_react(self, instruction_template, input_variables):
+        """
+        Runs a react chain with tools for accessing and reading web pages
+
+        :param instruction_template:
+        :param input_variables:
+        :return:
+        """
         return self.__answer_question_with_react(
             [reader_tool.SimpleReaderTool(), reader_tool.ReaderTool()],
             instruction_template,
@@ -173,6 +221,12 @@ class LLMManager(ABC):
         )
 
     def __chain_for_rag(self, documents):
+        """
+        Generic RAG chain for documents
+
+        :param documents:
+        :return:
+        """
         if len(documents) == 0 or (len(documents) == 1 and documents[0].page_content == ""):
             raise Exception("No content found in the document")
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -185,6 +239,15 @@ class LLMManager(ABC):
         return chain
 
     def __answer_question_on_documents(self, documents, instruction_template, input_variables, rag=True):
+        """
+        Question answering chain with documents
+
+        :param documents:
+        :param instruction_template:
+        :param input_variables:
+        :param rag:
+        :return:
+        """
         if rag:
             chain = self.__chain_for_rag(documents)
 
@@ -197,6 +260,14 @@ class LLMManager(ABC):
             return self.answer_question(instruction_template, {**input_variables, "data": page_content})
 
     def __answer_question_with_react(self, tools, instruction_template, input_variables):
+        """
+        Generic React chain with input tools
+
+        :param tools:
+        :param instruction_template:
+        :param input_variables:
+        :return:
+        """
         prompt = hub.pull("hwchase17/structured-chat-agent")
         agent = create_structured_chat_agent(
             self.__llm,
@@ -208,7 +279,19 @@ class LLMManager(ABC):
         return self.__run_llm(agent_executor, instruction_template, input_variables, wrap_prompt=True)
 
     def tokenize(self, text):
+        """
+        Tokenize the text to tokens
+
+        :param text:
+        :return:
+        """
         return self.__tokenization_encoder.encode(text)
 
     def detokenize(self, tokens):
+        """
+        Restore text from tokens
+
+        :param tokens:
+        :return:
+        """
         return self.__tokenization_encoder.decode(tokens)

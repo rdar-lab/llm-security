@@ -12,6 +12,9 @@ _logger = logging.getLogger(__name__)
 
 
 class LLMProtectorEraseAndCheck(LLMProtector):
+    """
+    A protector that uses the erase-and-check defense to protect against attacks
+    """
 
     def __init__(self, mode):
         super().__init__()

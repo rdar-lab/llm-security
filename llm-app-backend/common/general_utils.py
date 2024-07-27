@@ -5,6 +5,9 @@ _project_root = None
 
 
 def get_project_root():
+    """
+    Returns the project root path
+    """
     global _project_root
     if _project_root is None:
         curr: Optional[str] = os.getcwd()
