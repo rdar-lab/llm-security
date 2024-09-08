@@ -298,7 +298,7 @@ URL: {url}
 
 1. Preloaded - What is my account balance?
 
-    ![Transaction Manager - Preloaded](screencast/legitimate/Transaction_manager-Preloaded.mp4)
+    ![Transaction Manager - Preloaded](screencast/legitimate/Transaction_manager-Preloaded.webm)
 
 2. Gen-SQL - Generate SQL to retrun only deposits
 
