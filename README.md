@@ -10,6 +10,11 @@ Direct LLM injection attacks occur when an attacker directly injects malicious c
 
 I will also demonstrate several defenses against those attacks. These defensive measures are designed to identify, mitigate, and prevent LLM injection attempts. 
 
+Paper can be found here:
+
+[Full paper](paper/paper.pdf)\
+[Presentation](paper/presentation.pdf)
+
 ## Deployment and testing
 
 First clone the project from the repository
