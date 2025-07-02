@@ -12,8 +12,10 @@ I will also demonstrate several defenses against those attacks. These defensive 
 
 Paper can be found here:
 
-[Full paper](paper/paper.pdf)\
-[Presentation](paper/presentation.pdf)
+[Research Paper](paper/research-paper.pdf)\
+[Research Presentation](paper/research-presentation.pdf)\
+[Project Paper](paper/project-paper.pdf)\
+[Project Presentation](paper/project-presentation.pdf)
 
 ## Deployment and testing
 
